@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Tutorías — Calendario, Recordatorios y Google Calendar</title>
+    <style>
+        :root {
+            --primary: #0b69a3;
+            --muted: #f4f7fb;
+            --success: #2ea44f;
+            --warn: #ffb020;
+            --danger: #d04545;
+            --card-radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            font-family: Inter, "Segoe UI", Roboto, system-ui, sans-serif;
+            margin: 0;
+            background: linear-gradient(180deg, #eef6fb 0%, #ffffff 100%);
+            color: #08273f;
+            padding: 14px;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 14px
+        }
+
+        header h1 {
+            margin: 0;
+            color: var(--primary)
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 360px 1fr 340px;
+            gap: 14px
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 12px;
+            box-shadow: 0 6px 18px rgba(11, 38, 64, 0.06);
+            border: 1px solid rgba(11, 38, 64, 0.04)
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            margin-bottom: 6px
+        }
+
+        input[type="date"],
+        select,
+        input[type="text"],
+        input[type="number"] {
+            width: 90%;
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid #d6e6f4;
+            background: white
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 10px;
+            border-radius: 8px;
+            cursor: pointer
+        }
+
+        button.ghost {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid rgba(11, 105, 163, 0.12)
+        }
+
+        .muted {
+            color: #5b758e;
+            font-size: 13px
+        }
+
+        .small {
+            font-size: 13px
+        }
+
+        .row {
+            display: flex;
+            gap: 8px;
+            align-items: center
+        }
+
+        .group-list {
+            max-height: 520px;
+            overflow: auto;
+            padding-right: 6px
+        }
+
+        .grupo {
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #eef6fb
+        }
+
+        .grupo.finalizado {
+            background: #f6f6f6;
+            opacity: 0.9
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px
+        }
+
+        .link-btn {
+            width: 30%;
+        }
+
+        th,
+        td {
+            border: 1px solid #eef6fb;
+            padding: 6px;
+            text-align: center;
+            font-size: 13px
+        }
+
+        th {
+            background: #f3fbff
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 8px;
+            border-radius: 999px;
+            font-weight: 700;
+            color: white
+        }
+
+        .b-paid {
+            background: var(--success)
+        }
+
+        .b-pend {
+            background: var(--warn);
+            color: #3b2b00
+        }
+
+        .b-final {
+            background: #6b7280
+        }
+
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px
+        }
+
+        .cal-day {
+            min-height: 90px;
+            border-radius: 8px;
+            padding: 8px;
+            border: 1px solid #f0f4f8;
+            background: linear-gradient(180deg, #ffffff, #fbfdff)
+        }
+
+        .cal-day .date {
+            font-weight: 700;
+            margin-bottom: 8px
+        }
+
+        .cal-event {
+            font-size: 12px;
+            padding: 6px;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            background: #eef9ff;
+            border: 1px solid rgba(11, 105, 163, 0.06);
+            cursor: pointer
+        }
+
+        .controls {
+            display: flex;
+            gap: 8px;
+            align-items: center
+        }
+
+        .alert {
+            background: #fff8e6;
+            border-left: 4px solid var(--warn);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 14px
+        }
+
+        footer {
+            margin-top: 14px;
+            text-align: center;
+            color: #6b7280;
+            font-size: 13px
+        }
+
+        @media (max-width:1100px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            .calendar {
+                grid-template-columns: repeat(7, 1fr)
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>📚 Sistema de Tutorías — Calendario & Recordatorios</h1>
+        <div style="display:flex;gap:8px;align-items:center">
+            <input id="searchInput" placeholder="Buscar estudiante..."
+                style="padding:8px;border-radius:8px;border:1px solid #d6e6f4" />
+            <button id="btnExportJSON" class="ghost">Exportar JSON</button>
+        </div>
+    </header>
+
+    <main class="layout">
+        <!-- LEFT: Form y filtros -->
+        <div class="card">
+            <h3 style="margin-top:0;color:var(--primary)">Crear grupo</h3>
+            <form id="formGrupo">
+                <div style="margin-bottom:8px">
+                    <label>Fecha</label>
+                    <input type="date" id="fecha" required />
+                </div>
+                <div style="margin-bottom:8px">
+                    <label>Horario</label>
+                    <select id="horario" required>
+                        <option value="">Seleccione horario</option>
+                        <option value="10:00-12:00">10:00am - 12:00md</option>
+                        <option value="14:00-16:00">2:00pm - 4:00pm</option>
+                        <option value="16:00-18:00">4:00pm - 6:00pm</option>
+                        <option value="18:00-20:00">6:00pm - 8:00pm</option>
+                    </select>
+                </div>
+                <div style="margin-bottom:8px">
+                    <label>Tipo</label>
+                    <select id="tipo" required>
+                        <option value="grupal">Grupal (₡8,000 / estudiante)</option>
+                        <option value="individual">Individual (₡16,000)</option>
+                    </select>
+                </div>
+                <div class="row" style="margin-top:8px">
+                    <button type="submit">Crear grupo</button>
+                    <button type="button" id="btnClear" class="ghost">Limpiar</button>
+                </div>
+            </form>
+
+            <hr style="margin:12px 0;border:none;border-top:1px solid #eef6fb">
+
+            <h4 style="margin:6px 0">Filtros</h4>
+            <div style="display:grid;gap:8px">
+                <div>
+                    <label>Rango fecha (desde - hasta)</label>
+                    <div class="row">
+                        <input type="date" id="filterFrom" />
+                        <input type="date" id="filterTo" />
+                    </div>
+                </div>
+
+                <div>
+                    <label>Tipo</label>
+                    <select id="filterTipo">
+                        <option value="">Todos</option>
+                        <option value="grupal">Grupal</option>
+                        <option value="individual">Individual</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label>Estado</label>
+                    <select id="filterEstado">
+                        <option value="">Todos</option>
+                        <option value="activo">Activo</option>
+                        <option value="finalizado">Finalizado</option>
+                    </select>
+                </div>
+
+                <div class="row">
+                    <button id="btnApplyFilters" class="ghost">Aplicar</button>
+                    <button id="btnResetFilters" class="ghost">Reset</button>
+                </div>
+            </div>
+
+            <hr style="margin:12px 0;border:none;border-top:1px solid #eef6fb">
+
+            <h4 style="margin:6px 0">Agregar estudiante rápido</h4>
+            <div style="display:grid;gap:8px">
+                <input type="text" id="quickName" placeholder="Nombre..." />
+                <input type="text" id="quickMater" placeholder="Materia..." />
+                <input type="number" id="quickPaid" placeholder="Monto pagado (₡)" min="0" />
+                <div class="row">
+                    <button id="btnQuickAdd" class="ghost">Agregar al primer grupo</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- CENTER: Lista completa y calendario principal -->
+        <div>
+            <div id="alertsContainer"></div>
+
+            <div class="card group-list" id="groupsContainer"></div>
+
+            <div class="card" style="margin-top:12px">
+                <h4 style="margin:0 0 8px 0">Calendario mensual</h4>
+                <div class="row" style="margin-bottom:8px;align-items:center">
+                    <button id="prevMonth" class="ghost">← Mes</button>
+                    <div id="currentMonth" style="font-weight:800;margin-left:6px"></div>
+                    <button id="nextMonth" class="ghost">Mes →</button>
+                    <div style="margin-left:auto" class="muted small">Click en evento para abrir el grupo</div>
+                </div>
+                <div id="calendarGrid" class="calendar"></div>
+            </div>
+        </div>
+
+        <!-- RIGHT: Recordatorios y resumen -->
+        <div>
+            <div class="card">
+                <h4 style="margin:0 0 8px 0">Recordatorios (Hoy / Mañana)</h4>
+                <div id="reminders"></div>
+            </div>
+
+            <div class="card" style="margin-top:12px">
+                <h4 style="margin:0 0 8px 0">Totales</h4>
+                <div class="small muted">Datos calculados en tiempo real</div>
+                <div style="margin-top:8px">
+                    <div style="display:flex;justify-content:space-between">
+                        <div>Total clases</div>
+                        <div id="totalClases">0</div>
+                    </div>
+                    <div style="display:flex;justify-content:space-between">
+                        <div>Total estudiantes</div>
+                        <div id="totalEstudiantes">0</div>
+                    </div>
+                    <div style="display:flex;justify-content:space-between">
+                        <div>Recaudado</div>
+                        <div id="totalRecaudado">₡0</div>
+                    </div>
+                    <div style="display:flex;justify-content:space-between">
+                        <div>Pendiente</div>
+                        <div id="totalPendiente">₡0</div>
+                    </div>
+                </div>
+
+                <div style="margin-top:10px;display:flex;gap:8px">
+                    <button id="btnExportAll" class="ghost">Exportar JSON</button>
+                    <button id="btnClearAll" class="ghost">Borrar todo</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>Guardado local en tu navegador (LocalStorage). Si quieres sincronizar en varios dispositivos puedo agregar
+        backend después.</footer>
+
+    <script>
+        /* --------------------------
+          Datos en localStorage:
+          grupos: [
+            { id, fecha: "YYYY-MM-DD", horario: "14:00-16:00", tipo: "grupal"|"individual",
+              estudiantes: [{id,nombre,materia, amountPaid}], finalizado: bool, notas:"" }
+          ]
+        ---------------------------*/
+        const LS_KEY = 'tutor_grupos_calendar_v1';
+        let grupos = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
+
+        const PRICE_INDIV = 16000;
+        const PRICE_GRUPAL = 8000;
+
+        const groupsContainer = document.getElementById('groupsContainer');
+        const calendarGrid = document.getElementById('calendarGrid');
+        const remindersDiv = document.getElementById('reminders');
+        const alertsContainer = document.getElementById('alertsContainer');
+
+        let calendarState = { year: new Date().getFullYear(), month: new Date().getMonth() }; // month 0-11
+
+        // helpers
+        const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+        const formatMoney = v => '₡' + Number(v || 0).toLocaleString();
+
+        function save() { localStorage.setItem(LS_KEY, JSON.stringify(grupos)); }
+
+        // ensure groups from past dates automatically finalizados
+        function autoFinalize() {
+            const today = new Date().toISOString().split('T')[0];
+            grupos.forEach(g => { if (g.fecha < today) g.finalizado = true; });
+        }
+
+        /* ---------- render principal ---------- */
+        function renderAll() {
+            autoFinalize();
+            save();
+            renderGroups();
+            renderSummary();
+            renderCalendar();
+            renderReminders();
+        }
+
+        // RENDER GROUPS LIST
+        function renderGroups(filtered = null) {
+            const arr = filtered || grupos.slice().sort((a, b) => (a.fecha + a.horario).localeCompare(b.fecha + b.horario));
+            groupsContainer.innerHTML = '';
+            if (arr.length === 0) { groupsContainer.innerHTML = '<div class="card">No hay grupos.</div>'; return; }
+
+            arr.forEach(g => {
+                const div = document.createElement('div'); div.className = 'grupo';
+                if (g.finalizado) div.classList.add('finalizado');
+
+                const fechaLegible = new Date(g.fecha + 'T00:00').toLocaleDateString('es-CR', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' });
+                const totalEst = g.estudiantes.length;
+                const recaudado = g.estudiantes.reduce((s, x) => s + Number(x.amountPaid || 0), 0);
+                const costo = (g.tipo === 'individual') ? PRICE_INDIV : (totalEst * PRICE_GRUPAL);
+                const pendiente = costo - recaudado;
+
+                div.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-weight:800">${fechaLegible} • ${g.horario} • ${g.tipo.toUpperCase()}</div>
+          <div class="muted" style="font-size:13px">${g.notas || ''}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+          <div>
+            <span class="badge ${pendiente <= 0 ? 'b-paid' : 'b-pend'}">${totalEst} est.</span>
+            ${g.finalizado ? '<span class="badge b-final" style="margin-left:6px">Finalizado</span>' : ''}
+          </div>
+          <div class="small muted">Costo: ${formatMoney(costo)} • Recaudado: ${formatMoney(recaudado)}</div>
+        </div>
+      </div>
+
+      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+        ${!g.finalizado ? `<button onclick="openEditGroup('${g.id}')" class="ghost">Editar</button>` : ''}
+        ${!g.finalizado ? `<button onclick="finalizeGroup('${g.id}')" class="ghost">Finalizar</button>` : ''}
+        <button onclick="openGoogleCalendar('${g.id}')" class="ghost">Agregar a Google Calendar</button>
+        <button onclick="deleteGroup('${g.id}')" class="ghost">Eliminar</button>
+        <div style="margin-left:auto" class="muted small">Pendiente: ${formatMoney(pendiente)}</div>
+      </div>
+
+      <table>
+        <thead><tr><th>Nombre</th><th>Materia</th><th>Pagado (₡)</th><th>Saldo (₡)</th><th>Acción</th></tr></thead>
+        <tbody>
+          ${g.estudiantes.map(s => {
+                    const saldo = (g.tipo === 'individual' ? PRICE_INDIV : PRICE_GRUPAL) - (s.amountPaid || 0);
+                    return `<tr>
+              <td style="text-align:left;padding-left:8px">${escapeHtml(s.nombre)}</td>
+              <td>${escapeHtml(s.materia)}</td>
+              <td>${formatMoney(s.amountPaid || 0)}</td>
+              <td>${formatMoney(saldo)}</td>
+              <td>
+                ${!g.finalizado ? `<button onclick="editStudentPrompt('${g.id}','${s.id}')" class="link-btn">Editar</button>` : ''}
+                ${!g.finalizado ? `<button onclick="registerPaymentPrompt('${g.id}','${s.id}')" class="link-btn">Pagar</button>` : ''}
+                <button onclick="viewStudent('${g.id}','${s.id}')" class="link-btn">Ver</button>
+              </td>
+            </tr>`;
+                }).join('')}
+        </tbody>
+      </table>
+
+      <div style="display:flex;gap:8px;margin-top:8px">
+        ${!g.finalizado ? `<button onclick="quickAddStudent('${g.id}')" class="ghost">Agregar estudiante</button>` : ''}
+        <button onclick="exportGroupCSV('${g.id}')" class="ghost">Exportar grupo CSV</button>
+      </div>
+    `;
+                groupsContainer.appendChild(div);
+            });
+        }
+
+        /* ---------- calendar rendering (monthly) ---------- */
+        function renderCalendar() {
+            calendarGrid.innerHTML = '';
+            const { year, month } = calendarState;
+            const firstDay = new Date(year, month, 1).getDay(); // 0 sunday
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            document.getElementById('currentMonth').innerText = new Date(year, month, 1).toLocaleDateString('es-CR', { month: 'long', year: 'numeric' });
+
+            // blank slots before month start (assuming week starts on Sunday)
+            for (let i = 0; i < firstDay; i++) { const empty = document.createElement('div'); empty.className = 'cal-day'; calendarGrid.appendChild(empty); }
+
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const cell = document.createElement('div'); cell.className = 'cal-day';
+                cell.innerHTML = `<div class="date">${d}</div>`;
+                // events for that date
+                const events = grupos.filter(g => g.fecha === dateStr);
+                events.forEach(ev => {
+                    const evDiv = document.createElement('div'); evDiv.className = 'cal-event';
+                    evDiv.innerText = `${ev.horario} • ${ev.tipo} • ${ev.estudiantes.length} est.`;
+                    evDiv.onclick = () => { scrollToGroup(ev.id); };
+                    cell.appendChild(evDiv);
+                });
+                calendarGrid.appendChild(cell);
+            }
+        }
+
+        /* ---------- reminders (today / tomorrow) ---------- */
+        function renderReminders() {
+            remindersDiv.innerHTML = '';
+            alertsContainer.innerHTML = '';
+            const today = new Date();
+            const isoToday = today.toISOString().split('T')[0];
+            const isoTomorrow = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1).toISOString().split('T')[0];
+
+            const upcoming = grupos.filter(g => g.fecha === isoToday || g.fecha === isoTomorrow).sort((a, b) => a.fecha.localeCompare(b.fecha));
+
+            if (upcoming.length === 0) {
+                remindersDiv.innerHTML = '<div class="muted">No hay clases para hoy o mañana.</div>';
+                return;
+            }
+
+            upcoming.forEach(g => {
+                const when = g.fecha === isoToday ? 'Hoy' : 'Mañana';
+                const div = document.createElement('div'); div.className = 'alert';
+                div.innerHTML = `<strong>${when}:</strong> Clase ${g.fecha} • ${g.horario} • ${g.tipo} — ${g.estudiantes.length} estudiante(s). <div style="margin-top:6px"><button onclick="openGoogleCalendar('${g.id}')" class="ghost">Agregar a Google Calendar</button> <button onclick="scrollToGroup('${g.id}')" class="ghost">Abrir grupo</button></div>`;
+                remindersDiv.appendChild(div);
+
+                // banner also on top
+                const banner = document.createElement('div'); banner.className = 'alert';
+                banner.style.borderLeft = '4px solid var(--primary)';
+                banner.innerHTML = `<strong>Recordatorio:</strong> ${when} • ${g.fecha} • ${g.horario} • ${g.tipo} • ${g.estudiantes.length} est.`;
+                alertsContainer.appendChild(banner);
+            });
+        }
+
+        /* ---------- summary ---------- */
+        function renderSummary() {
+            const totalClases = grupos.length;
+            const totalEst = grupos.reduce((s, g) => s + g.estudiantes.length, 0);
+            const recaudado = grupos.reduce((s, g) => s + g.estudiantes.reduce((x, y) => x + Number(y.amountPaid || 0), 0), 0);
+            const costoTotal = grupos.reduce((s, g) => s + ((g.tipo === 'individual') ? (g.estudiantes.length ? PRICE_INDIV : 0) : (g.estudiantes.length * PRICE_GRUPAL)), 0);
+            const pendiente = costoTotal - recaudado;
+
+            document.getElementById('totalClases').innerText = totalClases;
+            document.getElementById('totalEstudiantes').innerText = totalEst;
+            document.getElementById('totalRecaudado').innerText = formatMoney(recaudado);
+            document.getElementById('totalPendiente').innerText = formatMoney(pendiente);
+        }
+
+        /* ---------- acciones (grupos, estudiantes, pagos) ---------- */
+        document.getElementById('formGrupo').addEventListener('submit', e => {
+            e.preventDefault();
+            const fecha = document.getElementById('fecha').value;
+            const horario = document.getElementById('horario').value;
+            const tipo = document.getElementById('tipo').value;
+            if (!fecha || !horario || !tipo) return alert('Complete todos los campos');
+            grupos.push({ id: uid(), fecha, horario, tipo, estudiantes: [], finalizado: false, notas: '' });
+            save(); renderAll();
+            e.target.reset();
+        });
+
+        function quickAddStudent(groupId) {
+            const g = grupos.find(x => x.id === groupId); if (!g) return alert('Grupo no encontrado');
+            if (g.finalizado) return alert('Grupo finalizado');
+            const name = prompt('Nombre del estudiante:'); if (!name) return;
+            const mater = prompt('Materia:', 'Matemáticas'); if (mater === null) return;
+            let paid = prompt('Monto pagado (₡) - dejar vacío = 0', '0'); if (paid === null) return;
+            paid = Number(paid) || 0;
+            if (g.tipo === 'individual' && g.estudiantes.length >= 1) return alert('Grupo individual ya tiene estudiante');
+            if (g.tipo === 'grupal' && g.estudiantes.length >= 5) return alert('Máximo 5 estudiantes');
+            g.estudiantes.push({ id: uid(), nombre: name.trim(), materia: mater.trim(), amountPaid: paid });
+            save(); renderAll();
+        }
+
+        document.getElementById('btnQuickAdd').addEventListener('click', () => {
+            const name = document.getElementById('quickName').value.trim();
+            const mater = document.getElementById('quickMater').value.trim();
+            const paid = Number(document.getElementById('quickPaid').value || 0);
+            if (!name || !mater) return alert('Nombre y materia requeridos');
+            if (grupos.length === 0) return alert('No hay grupos. Crea uno primero.');
+            const g = grupos[0];
+            if (g.finalizado) return alert('Primer grupo finalizado');
+            if (g.tipo === 'individual' && g.estudiantes.length >= 1) return alert('Primer grupo ya tiene 1 estudiante');
+            if (g.tipo === 'grupal' && g.estudiantes.length >= 5) return alert('Primer grupo ya tiene 5 estudiantes');
+            g.estudiantes.push({ id: uid(), nombre: name, materia: mater, amountPaid: paid });
+            save(); renderAll();
+            document.getElementById('quickName').value = ''; document.getElementById('quickMater').value = ''; document.getElementById('quickPaid').value = '';
+        });
+
+        function editStudentPrompt(groupId, studentId) {
+            const g = grupos.find(x => x.id === groupId); if (!g) return;
+            const s = g.estudiantes.find(x => x.id === studentId); if (!s) return;
+            const nuevo = prompt('Nombre:', s.nombre); if (nuevo === null) return;
+            const materia = prompt('Materia:', s.materia); if (materia === null) return;
+            s.nombre = nuevo.trim(); s.materia = materia.trim();
+            save(); renderAll();
+        }
+
+        function registerPaymentPrompt(groupId, studentId) {
+            const g = grupos.find(x => x.id === groupId); if (!g) return;
+            const s = g.estudiantes.find(x => x.id === studentId); if (!s) return;
+            const monto = prompt(`Registrar pago para ${s.nombre}. Monto actual: ${formatMoney(s.amountPaid || 0)}. Ingrese monto a sumar (₡):`, '0');
+            if (monto === null) return;
+            const v = Number(monto) || 0;
+            s.amountPaid = Number(s.amountPaid || 0) + v;
+            save(); renderAll();
+        }
+
+        function viewStudent(groupId, studentId) {
+            const g = grupos.find(x => x.id === groupId); if (!g) return;
+            const s = g.estudiantes.find(x => x.id === studentId); if (!s) return;
+            alert(`Estudiante: ${s.nombre}\nMateria: ${s.materia}\nPagado: ${formatMoney(s.amountPaid || 0)}\nSaldo: ${formatMoney((g.tipo === 'individual' ? PRICE_INDIV : PRICE_GRUPAL) - (s.amountPaid || 0))}`);
+        }
+
+        function openEditGroup(groupId) {
+            const g = grupos.find(x => x.id === groupId); if (!g) return;
+            const notas = prompt('Notas/observaciones (opcional):', g.notas || '');
+            if (notas === null) return;
+            g.notas = notas;
+            save(); renderAll();
+        }
+
+        function deleteGroup(groupId) {
+            if (!confirm('¿Eliminar grupo?')) return;
+            grupos = grupos.filter(x => x.id !== groupId);
+            save(); renderAll();
+        }
+
+        function finalizeGroup(groupId) {
+            if (!confirm('¿Marcar este grupo como finalizado?')) return;
+            const g = grupos.find(x => x.id === groupId); if (!g) return;
+            g.finalizado = true; save(); renderAll();
+        }
+
+        /* ---------- search & filters ---------- */
+        document.getElementById('searchInput').addEventListener('input', e => {
+            const q = e.target.value.trim().toLowerCase();
+            if (!q) { renderAll(); return; }
+            const found = grupos.filter(g => g.estudiantes.some(s => s.nombre.toLowerCase().includes(q)));
+            renderGroups(found);
+        });
+
+        document.getElementById('btnApplyFilters').addEventListener('click', () => {
+            const from = document.getElementById('filterFrom').value;
+            const to = document.getElementById('filterTo').value;
+            const tipo = document.getElementById('filterTipo').value;
+            const estado = document.getElementById('filterEstado').value;
+            let filtered = grupos.slice();
+            if (from) filtered = filtered.filter(g => g.fecha >= from);
+            if (to) filtered = filtered.filter(g => g.fecha <= to);
+            if (tipo) filtered = filtered.filter(g => g.tipo === tipo);
+            if (estado) filtered = filtered.filter(g => (estado === 'finalizado') ? g.finalizado : !g.finalizado);
+            renderGroups(filtered);
+        });
+        document.getElementById('btnResetFilters').addEventListener('click', () => {
+            document.getElementById('filterFrom').value = ''; document.getElementById('filterTo').value = ''; document.getElementById('filterTipo').value = ''; document.getElementById('filterEstado').value = '';
+            renderAll();
+        });
+        document.getElementById('btnClear').addEventListener('click', () => document.getElementById('formGrupo').reset());
+
+        /* ---------- calendar navigation ---------- */
+        document.getElementById('prevMonth').addEventListener('click', () => {
+            calendarState.month--; if (calendarState.month < 0) { calendarState.month = 11; calendarState.year--; } renderCalendar();
+        });
+        document.getElementById('nextMonth').addEventListener('click', () => {
+            calendarState.month++; if (calendarState.month > 11) { calendarState.month = 0; calendarState.year++; } renderCalendar();
+        });
+
+        /* ---------- scroll to group in list ---------- */
+        function scrollToGroup(groupId) {
+            const nodes = document.querySelectorAll('#groupsContainer .grupo');
+            for (const n of nodes) {
+                if (n.innerHTML.includes(groupId)) {
+                    n.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    n.style.boxShadow = '0 0 0 3px rgba(11,105,163,0.08)';
+                    setTimeout(() => n.style.boxShadow = '', 1400);
+                    return;
+                }
+            }
+            alert('Grupo agregado recientemente. Recarga la página si no lo ves.');
+        }
+
+        /* ---------- Google Calendar integration (prefill) ---------- */
+        /* Uses template URL (no OAuth). Opens event prefilled in user's Google Calendar */
+        function openGoogleCalendar(groupId) {
+            const g = grupos.find(x => x.id === groupId); if (!g) return alert('Grupo no encontrado');
+            const start = dateTimeForURL(g.fecha, g.horario.split('-')[0]); // YYYYMMDDTHHMMSS
+            const end = dateTimeForURL(g.fecha, g.horario.split('-')[1]);
+            const title = encodeURIComponent(`Tutoría ${g.tipo} • ${g.horario}`);
+            const studentsList = g.estudiantes.map(s => `- ${s.nombre} (${s.materia}) Pagó:${formatMoney(s.amountPaid || 0)}`).join('%0A');
+            const desc = encodeURIComponent(`Grupo de tutoría%0AFecha: ${g.fecha}%0AHorario: ${g.horario}%0A${studentsList}%0ANotas: ${g.notas || ''}`);
+            const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&details=${desc}`;
+            window.open(url, '_blank');
+        }
+        function dateTimeForURL(dateStr, timeStr) {
+            // dateStr "YYYY-MM-DD", timeStr "14:00" -> return YYYYMMDDTHHMM00
+            const [y, m, d] = dateStr.split('-');
+            const [hh, mm] = timeStr.split(':');
+            return `${y}${m}${d}T${hh}${mm}00`;
+        }
+
+        /* ---------- export and small utils ---------- */
+        document.getElementById('btnExportAll').addEventListener('click', () => {
+            const blob = new Blob([JSON.stringify(grupos, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'grupos.json'; a.click(); URL.revokeObjectURL(url);
+        });
+        document.getElementById('btnExportJSON').addEventListener('click', () => {
+            const blob = new Blob([JSON.stringify(grupos, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'grupos.json'; a.click(); URL.revokeObjectURL(url);
+        });
+        document.getElementById('btnClearAll').addEventListener('click', () => {
+            if (confirm('Borrar todos los datos guardados?')) { grupos = []; save(); renderAll(); }
+        });
+
+        function exportGroupCSV(groupId) {
+            const g = grupos.find(x => x.id === groupId); if (!g) return;
+            const rows = [['EstudianteID', 'Nombre', 'Materia', 'Pagado']];
+            g.estudiantes.forEach(s => rows.push([s.id, s.nombre, s.materia, s.amountPaid || 0]));
+            const csv = rows.map(r => r.map(c => `"${String(c || '').replace(/"/g, '""')}"`).join(',')).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `grupo_${g.id}.csv`; a.click(); URL.revokeObjectURL(url);
+        }
+
+        function escapeHtml(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+        /* ---------- init render ---------- */
+        renderAll();
+
+        /* ---------- small convenience: scroll search will filter groups by student -------- */
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const q = e.target.value.trim().toLowerCase();
+            if (!q) { renderAll(); return; }
+            const found = grupos.filter(g => g.estudiantes.some(s => s.nombre.toLowerCase().includes(q)));
+            renderGroups(found);
+        });
+
+    </script>
+</body>
+
+</html>
