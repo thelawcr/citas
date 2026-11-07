@@ -3,746 +3,2546 @@
 
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Tutorías — Calendario, Recordatorios y Google Calendar</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+    <title>Tutorías</title>
+    <meta name="description" content="Agenda de clases, estudiantes y cobros para tutorías." />
+    <meta name="theme-color" content="#f6f3ec" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#141b1b" media="(prefers-color-scheme: dark)" />
+    <link rel="icon"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230e6a5d'/%3E%3Cpath d='M9 10h14M16 10v13' stroke='white' stroke-width='3.4' stroke-linecap='round'/%3E%3C/svg%3E" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap"
+        rel="stylesheet" />
     <style>
         :root {
-            --primary: #0b69a3;
-            --muted: #f4f7fb;
-            --success: #2ea44f;
-            --warn: #ffb020;
-            --danger: #d04545;
-            --card-radius: 12px;
+            color-scheme: light dark;
+            --bg: #f6f3ec;
+            --surface: #fffdf9;
+            --surface-2: #efeae0;
+            --line: #e2dccf;
+            --ink: #1d2a2b;
+            --ink-2: #5a6664;
+            --brand: #0e6a5d;
+            --brand-hover: #0b574c;
+            --on-brand: #ffffff;
+            --brand-soft: #d9ece6;
+            --brand-soft-ink: #0b574c;
+            --amber: #8a5200;
+            --amber-dot: #e39a1f;
+            --amber-soft: #fbeccd;
+            --red: #b3322b;
+            --red-soft: #fae1dd;
+            --green: #1a6f44;
+            --green-dot: #2ea36a;
+            --green-soft: #daf0e2;
+            --shadow: 0 1px 2px rgba(40, 35, 20, .05), 0 8px 24px rgba(40, 35, 20, .06);
+            --radius: 14px;
+            --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+            --body: "DM Sans", "Segoe UI", system-ui, sans-serif;
         }
 
-        * {
-            box-sizing: border-box
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #141b1b;
+                --surface: #1c2525;
+                --surface-2: #263131;
+                --line: #2f3b3b;
+                --ink: #eaf0ee;
+                --ink-2: #a2b0ad;
+                --brand: #4cc3ac;
+                --brand-hover: #6dd3bf;
+                --on-brand: #06211c;
+                --brand-soft: #1d3f39;
+                --brand-soft-ink: #a4e6d8;
+                --amber: #f2c063;
+                --amber-dot: #e8a93a;
+                --amber-soft: #3d3016;
+                --red: #f19a91;
+                --red-soft: #472320;
+                --green: #84d9a9;
+                --green-dot: #4cc088;
+                --green-soft: #1b3c2b;
+                --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .25);
+            }
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        html {
+            -webkit-text-size-adjust: 100%;
         }
 
         body {
-            font-family: Inter, "Segoe UI", Roboto, system-ui, sans-serif;
             margin: 0;
-            background: linear-gradient(180deg, #eef6fb 0%, #ffffff 100%);
-            color: #08273f;
-            padding: 14px;
+            background: var(--bg);
+            color: var(--ink);
+            font: 400 16px/1.45 var(--body);
         }
 
-        header {
+        h1,
+        h2,
+        h3 {
+            font-family: var(--display);
+            font-weight: 700;
+            line-height: 1.15;
+            margin: 0;
+            letter-spacing: -.01em;
+        }
+
+        p {
+            margin: 0;
+        }
+
+        button,
+        input,
+        select,
+        textarea {
+            font: inherit;
+            color: inherit;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        :focus-visible {
+            outline: 2px solid var(--brand);
+            outline-offset: 2px;
+        }
+
+        [hidden] {
+            display: none !important;
+        }
+
+        .ico {
+            width: 20px;
+            height: 20px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex: none;
+        }
+
+        .num {
+            font-variant-numeric: tabular-nums;
+        }
+
+        .muted {
+            color: var(--ink-2);
+        }
+
+        .sr {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+            clip-path: inset(50%);
+            white-space: nowrap;
+        }
+
+        /* ---------- Estructura ---------- */
+        .app {
+            display: grid;
+            grid-template-columns: 236px minmax(0, 1fr);
+            min-height: 100dvh;
+        }
+
+        .side {
+            position: sticky;
+            top: 0;
+            height: 100dvh;
+            padding: 22px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+            border-right: 1px solid var(--line);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 8px;
+            font: 700 21px/1 var(--display);
+        }
+
+        .brand-mark {
+            width: 30px;
+            height: 30px;
+            border-radius: 9px;
+            background: var(--brand);
+            color: var(--on-brand);
+            display: grid;
+            place-items: center;
+        }
+
+        .nav {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .nav button {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            width: 100%;
+            padding: 10px 11px;
+            border: 0;
+            border-radius: 10px;
+            background: none;
+            color: var(--ink-2);
+            font-weight: 500;
+            text-align: left;
+        }
+
+        .nav button:hover {
+            background: var(--surface-2);
+            color: var(--ink);
+        }
+
+        .nav button[aria-current="page"] {
+            background: var(--brand-soft);
+            color: var(--brand-soft-ink);
+            font-weight: 700;
+        }
+
+        .nav-badge {
+            margin-left: auto;
+            min-width: 22px;
+            padding: 1px 6px;
+            border-radius: 99px;
+            background: var(--amber-soft);
+            color: var(--amber);
+            font-size: 12.5px;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .main {
+            min-width: 0;
+            padding: 30px 34px 60px;
+        }
+
+        .view {
+            max-width: 1120px;
+            margin: 0 auto;
+        }
+
+        .topbar,
+        .fab {
+            display: none;
+        }
+
+        /* ---------- Botones ---------- */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            min-height: 40px;
+            padding: 8px 14px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: var(--surface);
+            color: var(--ink);
+            font-weight: 500;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .btn:hover {
+            background: var(--surface-2);
+        }
+
+        .btn.primary {
+            background: var(--brand);
+            border-color: var(--brand);
+            color: var(--on-brand);
+            font-weight: 700;
+        }
+
+        .btn.primary:hover {
+            background: var(--brand-hover);
+            border-color: var(--brand-hover);
+        }
+
+        .btn.danger {
+            color: var(--red);
+        }
+
+        .btn.danger:hover {
+            background: var(--red-soft);
+        }
+
+        .btn.danger-solid {
+            background: var(--red);
+            border-color: var(--red);
+            color: var(--surface);
+            font-weight: 700;
+        }
+
+        .btn.small {
+            min-height: 34px;
+            padding: 5px 11px;
+            font-size: 14px;
+        }
+
+        .btn.block {
+            width: 100%;
+        }
+
+        .icon-btn {
+            display: inline-grid;
+            place-items: center;
+            width: 40px;
+            height: 40px;
+            border: 0;
+            border-radius: 10px;
+            background: none;
+            color: var(--ink-2);
+        }
+
+        .icon-btn:hover {
+            background: var(--surface-2);
+            color: var(--ink);
+        }
+
+        .link {
+            padding: 0;
+            border: 0;
+            background: none;
+            color: var(--brand);
+            font-weight: 700;
+            font-size: 14.5px;
+        }
+
+        .link:hover {
+            text-decoration: underline;
+        }
+
+        /* ---------- Encabezados ---------- */
+        .page-h {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 22px;
+            flex-wrap: wrap;
+        }
+
+        .page-h h1 {
+            font-size: 32px;
+        }
+
+        .page-h p {
+            margin-top: 5px;
+            color: var(--ink-2);
+        }
+
+        .sec-h {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 12px;
+            margin: 26px 0 10px;
+        }
+
+        .sec-h:first-child {
+            margin-top: 0;
+        }
+
+        .sec-h h2 {
+            font-size: 18px;
+        }
+
+        /* ---------- Tarjetas ---------- */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        .pad {
+            padding: 16px 18px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .stat {
+            display: block;
+            width: 100%;
+            padding: 14px 16px;
+            text-align: left;
+        }
+
+        button.stat:hover {
+            border-color: var(--brand);
+        }
+
+        .stat small {
+            display: block;
+            color: var(--ink-2);
+            font-size: 14px;
+        }
+
+        .stat b {
+            display: block;
+            margin-top: 3px;
+            font: 700 26px/1.15 var(--display);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .stat.alerta b {
+            color: var(--amber);
+        }
+
+        .cols {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 320px;
+            gap: 24px;
+            align-items: start;
+            margin-top: 22px;
+        }
+
+        .banner {
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 12px;
-            margin-bottom: 14px
-        }
-
-        header h1 {
-            margin: 0;
-            color: var(--primary)
-        }
-
-        .layout {
-            display: grid;
-            grid-template-columns: 360px 1fr 340px;
-            gap: 14px
-        }
-
-        .card {
-            background: white;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+            padding: 11px 14px;
             border-radius: 12px;
-            padding: 12px;
-            box-shadow: 0 6px 18px rgba(11, 38, 64, 0.06);
-            border: 1px solid rgba(11, 38, 64, 0.04)
+            background: var(--amber-soft);
+            color: var(--amber);
+            font-size: 15px;
         }
 
-        label {
-            display: block;
-            font-size: 13px;
-            margin-bottom: 6px
+        /* ---------- Fila de clase ---------- */
+        .lista {
+            overflow: hidden;
         }
 
-        input[type="date"],
-        select,
-        input[type="text"],
-        input[type="number"] {
-            width: 90%;
-            padding: 8px;
-            border-radius: 8px;
-            border: 1px solid #d6e6f4;
-            background: white
-        }
-
-        button {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 8px 10px;
-            border-radius: 8px;
-            cursor: pointer
-        }
-
-        button.ghost {
-            background: transparent;
-            color: var(--primary);
-            border: 1px solid rgba(11, 105, 163, 0.12)
-        }
-
-        .muted {
-            color: #5b758e;
-            font-size: 13px
-        }
-
-        .small {
-            font-size: 13px
-        }
-
-        .row {
-            display: flex;
-            gap: 8px;
-            align-items: center
-        }
-
-        .group-list {
-            max-height: 520px;
-            overflow: auto;
-            padding-right: 6px
-        }
-
-        .grupo {
-            border-radius: 8px;
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #eef6fb
-        }
-
-        .grupo.finalizado {
-            background: #f6f6f6;
-            opacity: 0.9
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 8px
-        }
-
-        .link-btn {
-            width: 30%;
-        }
-
-        th,
-        td {
-            border: 1px solid #eef6fb;
-            padding: 6px;
-            text-align: center;
-            font-size: 13px
-        }
-
-        th {
-            background: #f3fbff
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 6px 8px;
-            border-radius: 999px;
-            font-weight: 700;
-            color: white
-        }
-
-        .b-paid {
-            background: var(--success)
-        }
-
-        .b-pend {
-            background: var(--warn);
-            color: #3b2b00
-        }
-
-        .b-final {
-            background: #6b7280
-        }
-
-        .calendar {
+        .clase {
             display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 6px
+            grid-template-columns: 82px minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 14px;
+            width: 100%;
+            padding: 12px 16px;
+            border: 0;
+            border-bottom: 1px solid var(--line);
+            background: none;
+            text-align: left;
+        }
+
+        .clase:last-child {
+            border-bottom: 0;
+        }
+
+        .clase:hover {
+            background: var(--surface-2);
+        }
+
+        .clase:focus-visible {
+            outline-offset: -2px;
+        }
+
+        .clase-t b {
+            display: block;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+        }
+
+        .clase-t small {
+            display: block;
+            color: var(--ink-2);
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        .clase-m {
+            min-width: 0;
+        }
+
+        .clase-m b {
+            display: block;
+            overflow: hidden;
+            font-weight: 500;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .clase-m small {
+            display: block;
+            overflow: hidden;
+            color: var(--ink-2);
+            font-size: 13.5px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .clase-r {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 5px;
+        }
+
+        .clase.pasada .clase-t b,
+        .clase.pasada .clase-m b {
+            color: var(--ink-2);
+        }
+
+        .seats {
+            display: inline-flex;
+            gap: 4px;
+        }
+
+        .seat {
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+            border: 1.5px solid var(--line);
+        }
+
+        .seat.pendiente {
+            border-color: var(--amber-dot);
+        }
+
+        .seat.parcial {
+            border-color: var(--amber-dot);
+            background: linear-gradient(90deg, var(--amber-dot) 50%, transparent 50%);
+        }
+
+        .seat.pagado {
+            border-color: var(--green-dot);
+            background: var(--green-dot);
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 99px;
+            background: var(--surface-2);
+            color: var(--ink-2);
+            font-size: 12.5px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .tag.amber {
+            background: var(--amber-soft);
+            color: var(--amber);
+        }
+
+        .tag.green {
+            background: var(--green-soft);
+            color: var(--green);
+        }
+
+        .tag.brand {
+            background: var(--brand-soft);
+            color: var(--brand-soft-ink);
+        }
+
+        .vacio {
+            padding: 26px 18px;
+            color: var(--ink-2);
+            text-align: center;
+        }
+
+        .vacio b {
+            display: block;
+            color: var(--ink);
+            font: 700 18px/1.2 var(--display);
+            margin-bottom: 4px;
+        }
+
+        .vacio .btn {
+            margin-top: 12px;
+        }
+
+        .mes-h {
+            margin: 22px 0 8px;
+            color: var(--ink-2);
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .mes-h:first-child {
+            margin-top: 0;
+        }
+
+        /* ---------- Calendario ---------- */
+        .cal-wrap {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 320px;
+            gap: 20px;
+            align-items: start;
+        }
+
+        .cal-nav {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .cal-mes {
+            min-width: 180px;
+            font: 700 20px/1.2 var(--display);
+        }
+
+        .cal-mes::first-letter {
+            text-transform: uppercase;
+        }
+
+        .cal {
+            display: grid;
+            grid-template-columns: repeat(7, minmax(0, 1fr));
+            overflow: hidden;
+        }
+
+        .cal-dow {
+            padding: 8px 0;
+            border-bottom: 1px solid var(--line);
+            color: var(--ink-2);
+            font-size: 13px;
+            font-weight: 700;
+            text-align: center;
         }
 
         .cal-day {
-            min-height: 90px;
-            border-radius: 8px;
-            padding: 8px;
-            border: 1px solid #f0f4f8;
-            background: linear-gradient(180deg, #ffffff, #fbfdff)
-        }
-
-        .cal-day .date {
-            font-weight: 700;
-            margin-bottom: 8px
-        }
-
-        .cal-event {
-            font-size: 12px;
-            padding: 6px;
-            border-radius: 8px;
-            margin-bottom: 6px;
-            background: #eef9ff;
-            border: 1px solid rgba(11, 105, 163, 0.06);
-            cursor: pointer
-        }
-
-        .controls {
             display: flex;
+            flex-direction: column;
+            gap: 3px;
+            min-width: 0;
+            min-height: 100px;
+            padding: 6px;
+            border: 0;
+            border-right: 1px solid var(--line);
+            border-bottom: 1px solid var(--line);
+            background: none;
+            text-align: left;
+        }
+
+        .cal-day:nth-child(7n) {
+            border-right: 0;
+        }
+
+        .cal-day:hover {
+            background: var(--surface-2);
+        }
+
+        .cal-day:focus-visible {
+            outline-offset: -2px;
+        }
+
+        .cal-day.fuera {
+            background: color-mix(in srgb, var(--surface-2) 45%, transparent);
+            pointer-events: none;
+        }
+
+        .cal-day.sel {
+            background: var(--brand-soft);
+        }
+
+        .cal-n {
+            display: grid;
+            place-items: center;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            font-size: 14px;
+            font-weight: 500;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .cal-day.hoy .cal-n {
+            background: var(--brand);
+            color: var(--on-brand);
+            font-weight: 700;
+        }
+
+        .cal-ev {
+            display: block;
+            overflow: hidden;
+            padding: 1px 5px;
+            border-left: 3px solid var(--green-dot);
+            border-radius: 4px;
+            background: var(--surface-2);
+            font-size: 12.5px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .cal-ev.debe {
+            border-left-color: var(--amber-dot);
+        }
+
+        .cal-ev.vacia {
+            border-left-color: var(--line);
+        }
+
+        .cal-dots {
+            display: none;
+            gap: 3px;
+            padding-left: 3px;
+        }
+
+        .cal-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--green-dot);
+        }
+
+        .cal-dot.debe {
+            background: var(--amber-dot);
+        }
+
+        .cal-dot.vacia {
+            background: var(--ink-2);
+        }
+
+        .day-panel {
+            position: sticky;
+            top: 20px;
+        }
+
+        .day-panel h2 {
+            font-size: 18px;
+        }
+
+        .day-panel h2::first-letter {
+            text-transform: uppercase;
+        }
+
+        .day-h {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .day-f {
+            padding: 12px 16px;
+            border-top: 1px solid var(--line);
+        }
+
+        .day-panel .clase {
+            grid-template-columns: 70px minmax(0, 1fr);
+        }
+
+        .day-panel .clase-r {
+            display: none;
+        }
+
+        /* ---------- Filtros ---------- */
+        .filtros {
+            display: grid;
+            grid-template-columns: minmax(160px, 1.6fr) repeat(3, minmax(96px, .8fr)) repeat(2, minmax(150px, 1fr));
+            gap: 10px;
+            align-items: end;
+            margin-bottom: 18px;
+            padding: 14px;
+        }
+
+        .resultado {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 12px;
+            color: var(--ink-2);
+            font-size: 14.5px;
+        }
+
+        /* ---------- Cobros ---------- */
+        .deuda {
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+
+        .deuda-h {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .deuda-h b {
+            font: 700 18px/1.2 var(--display);
+        }
+
+        .deuda-h .monto {
+            color: var(--amber);
+            font: 700 18px/1.2 var(--display);
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+        }
+
+        .linea {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 9px 16px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .linea:last-child {
+            border-bottom: 0;
+        }
+
+        .linea-a {
+            min-width: 0;
+            padding: 0;
+            border: 0;
+            background: none;
+            text-align: left;
+        }
+
+        .linea-a:hover b {
+            text-decoration: underline;
+        }
+
+        .linea-a b {
+            display: block;
+            font-weight: 500;
+            font-size: 15px;
+        }
+
+        .linea-a b::first-letter {
+            text-transform: uppercase;
+        }
+
+        .linea-a small {
+            color: var(--ink-2);
+            font-size: 13.5px;
+        }
+
+        .linea-r {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            white-space: nowrap;
+        }
+
+        .mini-deuda {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            width: 100%;
+            padding: 10px 16px;
+            border: 0;
+            border-bottom: 1px solid var(--line);
+            background: none;
+            text-align: left;
+        }
+
+        .mini-deuda:last-child {
+            border-bottom: 0;
+        }
+
+        .mini-deuda:hover {
+            background: var(--surface-2);
+        }
+
+        .mini-deuda span:first-child {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .mini-deuda b {
+            color: var(--amber);
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* ---------- Datos ---------- */
+        .ajustes {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+            align-items: start;
+        }
+
+        .ajustes h2 {
+            margin-bottom: 4px;
+            font-size: 18px;
+        }
+
+        .ajustes .desc {
+            margin-bottom: 14px;
+            color: var(--ink-2);
+            font-size: 15px;
+        }
+
+        .stack {
+            display: grid;
+            gap: 10px;
+        }
+
+        .kv {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 7px 0;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .kv:last-child {
+            border-bottom: 0;
+        }
+
+        .kv b {
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* ---------- Formularios ---------- */
+        .field {
+            display: block;
+            min-width: 0;
+        }
+
+        .field>span,
+        .legend {
+            display: block;
+            margin-bottom: 5px;
+            padding: 0;
+            color: var(--ink-2);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .input {
+            display: block;
+            width: 100%;
+            min-height: 42px;
+            padding: 8px 11px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: var(--surface);
+            font-size: 16px;
+        }
+
+        textarea.input {
+            min-height: 72px;
+            resize: vertical;
+        }
+
+        .input:focus {
+            border-color: var(--brand);
+            outline: 1px solid var(--brand);
+            outline-offset: 0;
+        }
+
+        fieldset {
+            min-width: 0;
+            margin: 0;
+            padding: 0;
+            border: 0;
+        }
+
+        .grid2 {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+        }
+
+        .chip {
+            position: relative;
+        }
+
+        .chip input {
+            position: absolute;
+            opacity: 0;
+        }
+
+        .chip span {
+            display: block;
+            padding: 8px 12px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: var(--surface);
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .chip input:checked+span {
+            border-color: var(--brand);
+            background: var(--brand-soft);
+            color: var(--brand-soft-ink);
+            font-weight: 700;
+        }
+
+        .chip input:focus-visible+span {
+            outline: 2px solid var(--brand);
+            outline-offset: 2px;
+        }
+
+        .form-err {
+            padding: 9px 12px;
+            border-radius: 10px;
+            background: var(--red-soft);
+            color: var(--red);
+            font-size: 15px;
+        }
+
+        .form-warn {
+            padding: 9px 12px;
+            border-radius: 10px;
+            background: var(--amber-soft);
+            color: var(--amber);
+            font-size: 15px;
+        }
+
+        /* ---------- Diálogos ---------- */
+        dialog {
+            width: min(540px, calc(100vw - 32px));
+            max-height: min(88dvh, 780px);
+            padding: 0;
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            background: var(--surface);
+            color: var(--ink);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, .3);
+            overflow: hidden;
+        }
+
+        dialog[open] {
+            display: flex;
+            flex-direction: column;
+            animation: entrar .16s ease-out;
+        }
+
+        dialog::backdrop {
+            background: rgba(15, 22, 22, .45);
+        }
+
+        dialog.chico {
+            width: min(420px, calc(100vw - 32px));
+        }
+
+        @keyframes entrar {
+            from {
+                opacity: 0;
+                translate: 0 10px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation: none !important;
+                transition: none !important;
+                scroll-behavior: auto !important;
+            }
+        }
+
+        .sheet {
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            flex: 1;
+        }
+
+        .sheet-h {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 16px 12px 12px 20px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .sheet-h h2 {
+            font-size: 21px;
+            padding-top: 6px;
+        }
+
+        .sheet-h h2::first-letter {
+            text-transform: uppercase;
+        }
+
+        .sheet-h p {
+            margin-top: 3px;
+            color: var(--ink-2);
+            font-size: 15px;
+        }
+
+        .sheet-b {
+            display: grid;
+            gap: 14px;
+            padding: 16px 20px;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .sheet-f {
+            display: flex;
+            justify-content: flex-end;
+            flex-wrap: wrap;
             gap: 8px;
-            align-items: center
+            padding: 12px 20px calc(12px + env(safe-area-inset-bottom));
+            border-top: 1px solid var(--line);
         }
 
-        .alert {
-            background: #fff8e6;
-            border-left: 4px solid var(--warn);
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            font-size: 14px
+        .resumen {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            border-radius: 12px;
+            background: var(--surface-2);
         }
 
-        footer {
-            margin-top: 14px;
-            text-align: center;
-            color: #6b7280;
-            font-size: 13px
+        .resumen div {
+            padding: 9px 12px;
         }
 
-        @media (max-width:1100px) {
-            .layout {
-                grid-template-columns: 1fr;
+        .resumen small {
+            display: block;
+            color: var(--ink-2);
+            font-size: 13px;
+        }
+
+        .resumen b {
+            font: 700 18px/1.2 var(--display);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .alumno {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 0;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .alumno:last-of-type {
+            border-bottom: 0;
+        }
+
+        .alumno-i {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .alumno-i b {
+            display: block;
+            overflow: hidden;
+            font-weight: 500;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .alumno-i small {
+            color: var(--ink-2);
+            font-size: 13.5px;
+        }
+
+        .acciones {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .pago-h {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 3px 0;
+            font-size: 15px;
+        }
+
+        /* ---------- Avisos ---------- */
+        .toast {
+            position: fixed;
+            left: 50%;
+            bottom: 24px;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            width: max-content;
+            max-width: calc(100vw - 32px);
+            padding: 10px 16px;
+            border-radius: 12px;
+            background: var(--ink);
+            color: var(--bg);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .3);
+            font-size: 15px;
+            translate: -50% 0;
+        }
+
+        .toast button {
+            padding: 3px 0;
+            border: 0;
+            background: none;
+            color: inherit;
+            font-weight: 700;
+            text-decoration: underline;
+        }
+
+        /* ---------- Responsive ---------- */
+        @media (max-width: 1080px) {
+
+            .cols,
+            .cal-wrap {
+                grid-template-columns: minmax(0, 1fr);
             }
 
-            .calendar {
-                grid-template-columns: repeat(7, 1fr)
+            .day-panel {
+                position: static;
+            }
+
+            .filtros {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+
+            .filtros .f-buscar {
+                grid-column: 1 / -1;
+            }
+        }
+
+        @media (max-width: 760px) {
+            .app {
+                display: block;
+                padding-bottom: calc(68px + env(safe-area-inset-bottom));
+            }
+
+            .side {
+                position: fixed;
+                inset: auto 0 0 0;
+                z-index: 20;
+                height: auto;
+                padding: 4px 4px calc(4px + env(safe-area-inset-bottom));
+                border-top: 1px solid var(--line);
+                border-right: 0;
+                background: var(--surface);
+            }
+
+            .side .brand,
+            .side .btn {
+                display: none;
+            }
+
+            .nav {
+                flex-direction: row;
+            }
+
+            .nav button {
+                flex: 1;
+                flex-direction: column;
+                gap: 2px;
+                min-width: 0;
+                padding: 6px 2px;
+                font-size: 12px;
+                text-align: center;
+            }
+
+            .nav button[aria-current="page"] {
+                background: none;
+                color: var(--brand);
+            }
+
+            .nav-badge {
+                position: absolute;
+                top: 1px;
+                left: calc(50% + 6px);
+                min-width: 18px;
+                margin: 0;
+                padding: 0 4px;
+                font-size: 11.5px;
+            }
+
+            .main {
+                padding: 8px 16px 90px;
+            }
+
+            .topbar {
+                display: flex;
+                align-items: center;
+                padding: 10px 16px 0;
+            }
+
+            .topbar .brand {
+                padding: 0;
+                font-size: 19px;
+            }
+
+            .fab {
+                position: fixed;
+                right: 16px;
+                bottom: calc(76px + env(safe-area-inset-bottom));
+                z-index: 15;
+                display: inline-flex;
+                min-height: 50px;
+                padding: 10px 18px;
+                border-radius: 16px;
+                box-shadow: 0 8px 22px rgba(0, 0, 0, .28);
+            }
+
+            .page-h {
+                margin-bottom: 14px;
+            }
+
+            .page-h h1 {
+                font-size: 26px;
+            }
+
+            .page-h .btn.primary {
+                display: none;
+            }
+
+            .stats {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .stats .stat:last-child {
+                grid-column: 1 / -1;
+            }
+
+            .stat {
+                padding: 11px 13px;
+            }
+
+            .stat b {
+                font-size: 22px;
+            }
+
+            .clase {
+                grid-template-columns: 76px minmax(0, 1fr) auto;
+                gap: 10px;
+                padding: 11px 12px;
+            }
+
+            .cal-day {
+                align-items: center;
+                min-height: 54px;
+                padding: 4px 1px;
+            }
+
+            .cal-ev {
+                display: none;
+            }
+
+            .cal-dots {
+                display: flex;
+                padding: 0;
+            }
+
+            .cal-nav {
+                width: 100%;
+            }
+
+            .page-h h1.cal-mes {
+                min-width: 0;
+                flex: 1;
+                font-size: 21px;
+                text-align: center;
+            }
+
+            .filtros {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .ajustes {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .toast {
+                bottom: calc(82px + env(safe-area-inset-bottom));
+            }
+
+            dialog {
+                width: 100vw;
+                max-width: 100vw;
+                max-height: 92dvh;
+                margin: auto 0 0;
+                border-width: 1px 0 0;
+                border-radius: 18px 18px 0 0;
+            }
+
+            dialog.chico {
+                width: 100vw;
+            }
+
+            dialog .toast {
+                bottom: calc(84px + env(safe-area-inset-bottom));
+            }
+        }
+
+        @media print {
+
+            .side,
+            .fab,
+            .topbar {
+                display: none;
+            }
+
+            .app {
+                display: block;
             }
         }
     </style>
 </head>
 
 <body>
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+        <symbol id="i-inicio" viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5" /><path d="M5.5 10v10h13V10" /><path d="M10 20v-6h4v6" /></symbol>
+        <symbol id="i-calendario" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3" /><path d="M3.5 10h17M8 3v4M16 3v4" /></symbol>
+        <symbol id="i-clases" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11" /><circle cx="4.5" cy="6" r="1" /><circle cx="4.5" cy="12" r="1" /><circle cx="4.5" cy="18" r="1" /></symbol>
+        <symbol id="i-cobros" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="3" /><path d="M3 10.5h18M15.5 15h2" /></symbol>
+        <symbol id="i-datos" viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="8" ry="3" /><path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6" /><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3" /></symbol>
+        <symbol id="i-mas" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></symbol>
+        <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" /></symbol>
+        <symbol id="i-izq" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7" /></symbol>
+        <symbol id="i-der" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7" /></symbol>
+        <symbol id="i-lapiz" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16v4Z" /><path d="m13.5 6.5 4 4" /></symbol>
+        <symbol id="i-basura" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6.5 7l1 13h9l1-13" /></symbol>
+    </svg>
 
-    <header>
-        <h1>📚 Sistema de Tutorías — Calendario & Recordatorios</h1>
-        <div style="display:flex;gap:8px;align-items:center">
-            <input id="searchInput" placeholder="Buscar estudiante..."
-                style="padding:8px;border-radius:8px;border:1px solid #d6e6f4" />
-            <button id="btnExportJSON" class="ghost">Exportar JSON</button>
-        </div>
-    </header>
+    <div class="topbar">
+        <div class="brand"><span class="brand-mark"><svg class="ico" style="width:17px;height:17px"><use href="#i-clases" /></svg></span>Tutorías</div>
+    </div>
 
-    <main class="layout">
-        <!-- LEFT: Form y filtros -->
-        <div class="card">
-            <h3 style="margin-top:0;color:var(--primary)">Crear grupo</h3>
-            <form id="formGrupo">
-                <div style="margin-bottom:8px">
-                    <label>Fecha</label>
-                    <input type="date" id="fecha" required />
-                </div>
-                <div style="margin-bottom:8px">
-                    <label>Horario</label>
-                    <select id="horario" required>
-                        <option value="">Seleccione horario</option>
-                        <option value="10:00-12:00">10:00am - 12:00md</option>
-                        <option value="14:00-16:00">2:00pm - 4:00pm</option>
-                        <option value="16:00-18:00">4:00pm - 6:00pm</option>
-                        <option value="18:00-20:00">6:00pm - 8:00pm</option>
-                    </select>
-                </div>
-                <div style="margin-bottom:8px">
-                    <label>Tipo</label>
-                    <select id="tipo" required>
-                        <option value="grupal">Grupal (₡8,000 / estudiante)</option>
-                        <option value="individual">Individual (₡16,000)</option>
-                    </select>
-                </div>
-                <div class="row" style="margin-top:8px">
-                    <button type="submit">Crear grupo</button>
-                    <button type="button" id="btnClear" class="ghost">Limpiar</button>
-                </div>
-            </form>
+    <div class="app">
+        <aside class="side">
+            <div class="brand"><span class="brand-mark"><svg class="ico" style="width:17px;height:17px"><use href="#i-clases" /></svg></span>Tutorías</div>
+            <button class="btn primary block" data-act="nuevaClase"><svg class="ico"><use href="#i-mas" /></svg>Nueva clase</button>
+            <nav class="nav" aria-label="Secciones">
+                <button data-act="ir" data-view="inicio"><svg class="ico"><use href="#i-inicio" /></svg>Inicio</button>
+                <button data-act="ir" data-view="calendario"><svg class="ico"><use href="#i-calendario" /></svg>Calendario</button>
+                <button data-act="ir" data-view="clases"><svg class="ico"><use href="#i-clases" /></svg>Clases</button>
+                <button data-act="ir" data-view="cobros"><svg class="ico"><use href="#i-cobros" /></svg>Cobros<span class="nav-badge num" id="navBadge" hidden></span></button>
+                <button data-act="ir" data-view="datos"><svg class="ico"><use href="#i-datos" /></svg>Datos</button>
+            </nav>
+        </aside>
 
-            <hr style="margin:12px 0;border:none;border-top:1px solid #eef6fb">
+        <main class="main">
+            <section class="view" id="v-inicio" hidden></section>
 
-            <h4 style="margin:6px 0">Filtros</h4>
-            <div style="display:grid;gap:8px">
+            <section class="view" id="v-calendario" hidden>
+                <div class="page-h">
+                    <div class="cal-nav">
+                        <button class="icon-btn" data-act="mes" data-delta="-1" aria-label="Mes anterior"><svg class="ico"><use href="#i-izq" /></svg></button>
+                        <h1 class="cal-mes" id="calMes" aria-live="polite"></h1>
+                        <button class="icon-btn" data-act="mes" data-delta="1" aria-label="Mes siguiente"><svg class="ico"><use href="#i-der" /></svg></button>
+                        <button class="btn small" data-act="mesHoy">Hoy</button>
+                    </div>
+                </div>
+                <div class="cal-wrap">
+                    <div class="card cal" id="calGrid"></div>
+                    <div class="card day-panel lista" id="dayPanel"></div>
+                </div>
+            </section>
+
+            <section class="view" id="v-clases" hidden>
+                <div class="page-h">
+                    <div>
+                        <h1>Clases</h1>
+                        <p>Busque por estudiante o materia y filtre el historial.</p>
+                    </div>
+                    <button class="btn primary" data-act="nuevaClase"><svg class="ico"><use href="#i-mas" /></svg>Nueva clase</button>
+                </div>
+                <div class="card filtros">
+                    <label class="field f-buscar"><span>Buscar</span><input class="input" id="fBuscar" type="search" placeholder="Nombre o materia" autocomplete="off" /></label>
+                    <label class="field"><span>Tipo</span>
+                        <select class="input" id="fTipo">
+                            <option value="">Todos</option>
+                            <option value="grupal">Grupal</option>
+                            <option value="individual">Individual</option>
+                        </select></label>
+                    <label class="field"><span>Estado</span>
+                        <select class="input" id="fEstado">
+                            <option value="">Todas</option>
+                            <option value="proxima">Próximas</option>
+                            <option value="finalizada">Finalizadas</option>
+                        </select></label>
+                    <label class="field"><span>Pago</span>
+                        <select class="input" id="fPago">
+                            <option value="">Todos</option>
+                            <option value="debe">Con saldo</option>
+                            <option value="aldia">Al día</option>
+                        </select></label>
+                    <label class="field"><span>Desde</span><input class="input" id="fDesde" type="date" /></label>
+                    <label class="field"><span>Hasta</span><input class="input" id="fHasta" type="date" /></label>
+                </div>
+                <div class="resultado"><span id="fConteo"></span><button class="link" data-act="limpiarFiltros" id="fLimpiar" hidden>Limpiar filtros</button></div>
+                <div id="clasesLista"></div>
+            </section>
+
+            <section class="view" id="v-cobros" hidden></section>
+
+            <section class="view" id="v-datos" hidden>
+                <div class="page-h">
+                    <div>
+                        <h1>Datos</h1>
+                        <p>Precios, respaldos y resumen general.</p>
+                    </div>
+                </div>
+                <div class="ajustes">
+                    <div class="card pad">
+                        <h2>Respaldo</h2>
+                        <p class="desc">Sus datos se guardan solo en este navegador. Descargue un respaldo con frecuencia y úselo para restaurarlos o pasarlos a otro dispositivo.</p>
+                        <p class="desc" id="ultimoRespaldo"></p>
+                        <div class="stack">
+                            <button class="btn primary block" data-act="exportarJSON">Descargar respaldo</button>
+                            <button class="btn block" data-act="elegirImport">Restaurar desde un archivo</button>
+                            <button class="btn block" data-act="exportarTodoCSV">Exportar todo a Excel (CSV)</button>
+                            <input type="file" id="fileImport" accept=".json,application/json" hidden />
+                        </div>
+                    </div>
+                    <div class="card pad">
+                        <h2>Precios</h2>
+                        <p class="desc">Se aplican a las clases nuevas. Las clases ya creadas conservan su precio.</p>
+                        <form class="stack" id="formAjustes">
+                            <div class="grid2">
+                                <label class="field"><span>Grupal, por estudiante (₡)</span><input class="input" id="aGrupal" type="number" min="0" step="1" inputmode="numeric" required /></label>
+                                <label class="field"><span>Individual (₡)</span><input class="input" id="aIndividual" type="number" min="0" step="1" inputmode="numeric" required /></label>
+                            </div>
+                            <label class="field"><span>Máximo de estudiantes por grupo</span><input class="input" id="aMax" type="number" min="1" max="30" step="1" inputmode="numeric" required /></label>
+                        </form>
+                    </div>
+                    <div class="card pad">
+                        <h2>Resumen general</h2>
+                        <p class="desc">Todo el historial guardado.</p>
+                        <div id="totales"></div>
+                    </div>
+                    <div class="card pad">
+                        <h2>Borrar datos</h2>
+                        <p class="desc">Elimina todas las clases, estudiantes y pagos de este navegador.</p>
+                        <button class="btn danger block" data-act="borrarTodo">Borrar todo</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <button class="btn primary fab" data-act="nuevaClase"><svg class="ico"><use href="#i-mas" /></svg>Nueva clase</button>
+
+    <!-- Crear / editar clase -->
+    <dialog id="dlgClase" aria-labelledby="dlgClaseT">
+        <form class="sheet" id="formClase" novalidate>
+            <header class="sheet-h">
+                <h2 id="dlgClaseT">Nueva clase</h2>
+                <button type="button" class="icon-btn" data-act="cerrar" aria-label="Cerrar"><svg class="ico"><use href="#i-x" /></svg></button>
+            </header>
+            <div class="sheet-b">
+                <label class="field"><span>Fecha</span><input class="input" id="cFecha" type="date" required /></label>
+                <fieldset>
+                    <legend class="legend">Horario</legend>
+                    <div class="chips" id="cSlots"></div>
+                </fieldset>
+                <div class="grid2" id="cOtro" hidden>
+                    <label class="field"><span>Inicio</span><input class="input" id="cIni" type="time" /></label>
+                    <label class="field"><span>Fin</span><input class="input" id="cFin" type="time" /></label>
+                </div>
+                <fieldset>
+                    <legend class="legend">Tipo</legend>
+                    <div class="chips">
+                        <label class="chip"><input type="radio" name="tipo" value="grupal" checked /><span>Grupal</span></label>
+                        <label class="chip"><input type="radio" name="tipo" value="individual" /><span>Individual</span></label>
+                    </div>
+                </fieldset>
+                <div class="grid2">
+                    <label class="field"><span>Precio por estudiante (₡)</span><input class="input" id="cPrecio" type="number" min="0" step="1" inputmode="numeric" required /></label>
+                    <label class="field" id="cRepetirBox"><span>Repetir cada semana</span>
+                        <select class="input" id="cRepetir">
+                            <option value="0">No repetir</option>
+                            <option value="1">1 semana más</option>
+                            <option value="3">3 semanas más</option>
+                            <option value="7">7 semanas más</option>
+                        </select></label>
+                </div>
+                <label class="field"><span>Notas (opcional)</span><textarea class="input" id="cNotas" rows="2"></textarea></label>
+                <p class="form-warn" id="cAviso" hidden></p>
+                <p class="form-err" id="cError" role="alert" hidden></p>
+            </div>
+            <footer class="sheet-f">
+                <button type="button" class="btn" data-act="cerrar">Cancelar</button>
+                <button type="submit" class="btn primary" id="cGuardar">Crear clase</button>
+            </footer>
+        </form>
+    </dialog>
+
+    <!-- Detalle de clase -->
+    <dialog id="dlgDetalle" aria-labelledby="dTitulo">
+        <div class="sheet" id="detalle"></div>
+    </dialog>
+
+    <!-- Estudiante -->
+    <dialog id="dlgAlumno" class="chico" aria-labelledby="dlgAlumnoT">
+        <form class="sheet" id="formAlumno" novalidate>
+            <header class="sheet-h">
+                <h2 id="dlgAlumnoT">Agregar estudiante</h2>
+                <button type="button" class="icon-btn" data-act="cerrar" aria-label="Cerrar"><svg class="ico"><use href="#i-x" /></svg></button>
+            </header>
+            <div class="sheet-b">
+                <label class="field"><span>Nombre</span><input class="input" id="eNombre" list="listaNombres" autocomplete="off" required /></label>
+                <label class="field"><span>Materia</span><input class="input" id="eMateria" list="listaMaterias" autocomplete="off" required /></label>
+                <div id="ePagoBox">
+                    <label class="field"><span>Pago recibido ahora (₡)</span><input class="input" id="ePago" type="number" min="0" step="1" inputmode="numeric" placeholder="0" /></label>
+                    <div class="acciones" style="margin-top:8px"><button type="button" class="btn small" data-act="ePagoCompleto" id="ePagoBtn"></button></div>
+                </div>
+                <p class="form-err" id="eError" role="alert" hidden></p>
+            </div>
+            <footer class="sheet-f">
+                <button type="button" class="btn danger" id="eQuitar" data-act="quitarAlumno" style="margin-right:auto" hidden>Quitar</button>
+                <button type="button" class="btn" data-act="cerrar">Cancelar</button>
+                <button type="submit" class="btn primary" id="eGuardar">Agregar</button>
+            </footer>
+            <datalist id="listaNombres"></datalist>
+            <datalist id="listaMaterias"></datalist>
+        </form>
+    </dialog>
+
+    <!-- Pago -->
+    <dialog id="dlgPago" class="chico" aria-labelledby="dlgPagoT">
+        <form class="sheet" id="formPago" novalidate>
+            <header class="sheet-h">
                 <div>
-                    <label>Rango fecha (desde - hasta)</label>
-                    <div class="row">
-                        <input type="date" id="filterFrom" />
-                        <input type="date" id="filterTo" />
-                    </div>
+                    <h2 id="dlgPagoT">Registrar pago</h2>
+                    <p id="pInfo" class="num"></p>
                 </div>
-
-                <div>
-                    <label>Tipo</label>
-                    <select id="filterTipo">
-                        <option value="">Todos</option>
-                        <option value="grupal">Grupal</option>
-                        <option value="individual">Individual</option>
-                    </select>
+                <button type="button" class="icon-btn" data-act="cerrar" aria-label="Cerrar"><svg class="ico"><use href="#i-x" /></svg></button>
+            </header>
+            <div class="sheet-b">
+                <div class="grid2">
+                    <label class="field"><span>Monto (₡)</span><input class="input num" id="pMonto" type="number" min="1" step="1" inputmode="numeric" required /></label>
+                    <label class="field"><span>Fecha del pago</span><input class="input" id="pFecha" type="date" required /></label>
                 </div>
-
-                <div>
-                    <label>Estado</label>
-                    <select id="filterEstado">
-                        <option value="">Todos</option>
-                        <option value="activo">Activo</option>
-                        <option value="finalizado">Finalizado</option>
-                    </select>
-                </div>
-
-                <div class="row">
-                    <button id="btnApplyFilters" class="ghost">Aplicar</button>
-                    <button id="btnResetFilters" class="ghost">Reset</button>
-                </div>
+                <div class="acciones" id="pAtajos"></div>
+                <div id="pHistorial"></div>
+                <p class="form-err" id="pError" role="alert" hidden></p>
             </div>
+            <footer class="sheet-f">
+                <button type="button" class="btn" data-act="cerrar">Cancelar</button>
+                <button type="submit" class="btn primary">Registrar pago</button>
+            </footer>
+        </form>
+    </dialog>
 
-            <hr style="margin:12px 0;border:none;border-top:1px solid #eef6fb">
-
-            <h4 style="margin:6px 0">Agregar estudiante rápido</h4>
-            <div style="display:grid;gap:8px">
-                <input type="text" id="quickName" placeholder="Nombre..." />
-                <input type="text" id="quickMater" placeholder="Materia..." />
-                <input type="number" id="quickPaid" placeholder="Monto pagado (₡)" min="0" />
-                <div class="row">
-                    <button id="btnQuickAdd" class="ghost">Agregar al primer grupo</button>
-                </div>
-            </div>
+    <!-- Confirmación -->
+    <dialog id="dlgConfirmar" class="chico" aria-labelledby="qTitulo">
+        <div class="sheet">
+            <header class="sheet-h"><h2 id="qTitulo"></h2></header>
+            <div class="sheet-b"><p id="qTexto"></p></div>
+            <footer class="sheet-f" id="qBotones"></footer>
         </div>
+    </dialog>
 
-        <!-- CENTER: Lista completa y calendario principal -->
-        <div>
-            <div id="alertsContainer"></div>
-
-            <div class="card group-list" id="groupsContainer"></div>
-
-            <div class="card" style="margin-top:12px">
-                <h4 style="margin:0 0 8px 0">Calendario mensual</h4>
-                <div class="row" style="margin-bottom:8px;align-items:center">
-                    <button id="prevMonth" class="ghost">← Mes</button>
-                    <div id="currentMonth" style="font-weight:800;margin-left:6px"></div>
-                    <button id="nextMonth" class="ghost">Mes →</button>
-                    <div style="margin-left:auto" class="muted small">Click en evento para abrir el grupo</div>
-                </div>
-                <div id="calendarGrid" class="calendar"></div>
-            </div>
-        </div>
-
-        <!-- RIGHT: Recordatorios y resumen -->
-        <div>
-            <div class="card">
-                <h4 style="margin:0 0 8px 0">Recordatorios (Hoy / Mañana)</h4>
-                <div id="reminders"></div>
-            </div>
-
-            <div class="card" style="margin-top:12px">
-                <h4 style="margin:0 0 8px 0">Totales</h4>
-                <div class="small muted">Datos calculados en tiempo real</div>
-                <div style="margin-top:8px">
-                    <div style="display:flex;justify-content:space-between">
-                        <div>Total clases</div>
-                        <div id="totalClases">0</div>
-                    </div>
-                    <div style="display:flex;justify-content:space-between">
-                        <div>Total estudiantes</div>
-                        <div id="totalEstudiantes">0</div>
-                    </div>
-                    <div style="display:flex;justify-content:space-between">
-                        <div>Recaudado</div>
-                        <div id="totalRecaudado">₡0</div>
-                    </div>
-                    <div style="display:flex;justify-content:space-between">
-                        <div>Pendiente</div>
-                        <div id="totalPendiente">₡0</div>
-                    </div>
-                </div>
-
-                <div style="margin-top:10px;display:flex;gap:8px">
-                    <button id="btnExportAll" class="ghost">Exportar JSON</button>
-                    <button id="btnClearAll" class="ghost">Borrar todo</button>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <footer>Guardado local en tu navegador (LocalStorage). Si quieres sincronizar en varios dispositivos puedo agregar
-        backend después.</footer>
+    <div class="toast" id="toast" role="status" hidden><span id="toastTxt"></span><button type="button" id="toastBtn" hidden>Deshacer</button></div>
 
     <script>
-        /* --------------------------
-          Datos en localStorage:
-          grupos: [
-            { id, fecha: "YYYY-MM-DD", horario: "14:00-16:00", tipo: "grupal"|"individual",
-              estudiantes: [{id,nombre,materia, amountPaid}], finalizado: bool, notas:"" }
-          ]
-        ---------------------------*/
+        'use strict';
+        /* ==========================================================
+           Datos (localStorage)
+           grupos: [{ id, fecha:"YYYY-MM-DD", horario:"14:00-16:00",
+                      tipo:"grupal"|"individual", precio, notas, finalizado,
+                      estudiantes:[{ id, nombre, materia, amountPaid,
+                                     pagos:[{ id, monto, fecha }] }] }]
+           Se usa la misma clave de la versión anterior, así los datos
+           existentes siguen disponibles. amountPaid se mantiene como
+           suma de pagos para conservar compatibilidad.
+        ========================================================== */
         const LS_KEY = 'tutor_grupos_calendar_v1';
-        let grupos = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
+        const LS_COPIA = 'tutor_grupos_calendar_v1_copia_previa';
+        const LS_AJUSTES = 'tutor_ajustes_v1';
+        const PRECIO_ANTERIOR = { grupal: 8000, individual: 16000 };
+        const HORARIOS = ['10:00-12:00', '14:00-16:00', '16:00-18:00', '18:00-20:00'];
+        const DIAS_RESPALDO = 14;
 
-        const PRICE_INDIV = 16000;
-        const PRICE_GRUPAL = 8000;
+        const $ = id => document.getElementById(id);
+        const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+        const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        const dinero = v => '₡' + Math.round(Number(v) || 0).toLocaleString('en-US');
+        const plano = s => String(s || '').trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+        const plural = (n, uno, varios) => `${n} ${n === 1 ? uno : varios}`;
+        const icono = n => `<svg class="ico"><use href="#i-${n}"/></svg>`;
 
-        const groupsContainer = document.getElementById('groupsContainer');
-        const calendarGrid = document.getElementById('calendarGrid');
-        const remindersDiv = document.getElementById('reminders');
-        const alertsContainer = document.getElementById('alertsContainer');
+        /* ---------- Fechas: siempre en hora local ---------- */
+        const pad = n => String(n).padStart(2, '0');
+        const iso = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+        const hoy = () => iso(new Date());
+        const aFecha = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+        const sumarDias = (s, n) => { const d = aFecha(s); d.setDate(d.getDate() + n); return iso(d); };
+        const fechaLarga = s => aFecha(s).toLocaleDateString('es-CR', { weekday: 'long', day: 'numeric', month: 'long' });
+        const fechaCorta = s => aFecha(s).toLocaleDateString('es-CR', { weekday: 'short', day: 'numeric', month: 'short' }).replace(/\./g, '');
+        const fechaAnio = s => aFecha(s).toLocaleDateString('es-CR', { day: 'numeric', month: 'short', year: 'numeric' }).replace(/\./g, '');
+        function hora12(t) {
+            const [h, m] = t.split(':').map(Number);
+            if (h === 12 && m === 0) return '12:00 md';
+            return `${h % 12 || 12}:${pad(m)} ${h < 12 ? 'am' : 'pm'}`;
+        }
+        const rangoHoras = g => g.horario.split('-');
+        const textoHorario = h => h.split('-').map(hora12).join(' – ');
+        const inicio = g => new Date(`${g.fecha}T${rangoHoras(g)[0]}`);
+        const fin = g => new Date(`${g.fecha}T${rangoHoras(g)[1]}`);
+        const orden = (a, b) => (a.fecha + a.horario).localeCompare(b.fecha + b.horario);
 
-        let calendarState = { year: new Date().getFullYear(), month: new Date().getMonth() }; // month 0-11
-
-        // helpers
-        const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-        const formatMoney = v => '₡' + Number(v || 0).toLocaleString();
-
-        function save() { localStorage.setItem(LS_KEY, JSON.stringify(grupos)); }
-
-        // ensure groups from past dates automatically finalizados
-        function autoFinalize() {
-            const today = new Date().toISOString().split('T')[0];
-            grupos.forEach(g => { if (g.fecha < today) g.finalizado = true; });
+        /* ---------- Carga y guardado ---------- */
+        function normalizarEstudiante(s, fecha) {
+            let pagos = [];
+            if (Array.isArray(s.pagos)) {
+                pagos = s.pagos.map(p => ({ id: String(p.id || uid()), monto: Number(p.monto) || 0, fecha: String(p.fecha || fecha) })).filter(p => p.monto);
+            } else if (Number(s.amountPaid)) {
+                pagos = [{ id: uid(), monto: Number(s.amountPaid), fecha }];
+            }
+            return { id: String(s.id || uid()), nombre: String(s.nombre || '').trim(), materia: String(s.materia || '').trim(), pagos };
         }
 
-        /* ---------- render principal ---------- */
-        function renderAll() {
-            autoFinalize();
-            save();
-            renderGroups();
-            renderSummary();
-            renderCalendar();
-            renderReminders();
+        function normalizarGrupo(g) {
+            const tipo = g.tipo === 'individual' ? 'individual' : 'grupal';
+            const tienePrecio = g.precio !== undefined && g.precio !== null && !isNaN(Number(g.precio));
+            return {
+                id: String(g.id || uid()),
+                fecha: String(g.fecha),
+                horario: String(g.horario),
+                tipo,
+                precio: tienePrecio ? Number(g.precio) : PRECIO_ANTERIOR[tipo],
+                notas: String(g.notas || ''),
+                // La versión anterior finalizaba por error las clases del día después de las 6 pm.
+                finalizado: !!g.finalizado && (tienePrecio || g.fecha !== hoy()),
+                estudiantes: (Array.isArray(g.estudiantes) ? g.estudiantes : []).map(s => normalizarEstudiante(s, String(g.fecha))),
+            };
         }
 
-        // RENDER GROUPS LIST
-        function renderGroups(filtered = null) {
-            const arr = filtered || grupos.slice().sort((a, b) => (a.fecha + a.horario).localeCompare(b.fecha + b.horario));
-            groupsContainer.innerHTML = '';
-            if (arr.length === 0) { groupsContainer.innerHTML = '<div class="card">No hay grupos.</div>'; return; }
+        const grupoValido = g => g && /^\d{4}-\d{2}-\d{2}$/.test(g.fecha) && /^\d{2}:\d{2}-\d{2}:\d{2}$/.test(g.horario);
 
-            arr.forEach(g => {
-                const div = document.createElement('div'); div.className = 'grupo';
-                if (g.finalizado) div.classList.add('finalizado');
-
-                const fechaLegible = new Date(g.fecha + 'T00:00').toLocaleDateString('es-CR', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' });
-                const totalEst = g.estudiantes.length;
-                const recaudado = g.estudiantes.reduce((s, x) => s + Number(x.amountPaid || 0), 0);
-                const costo = (g.tipo === 'individual') ? PRICE_INDIV : (totalEst * PRICE_GRUPAL);
-                const pendiente = costo - recaudado;
-
-                div.innerHTML = `
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div>
-          <div style="font-weight:800">${fechaLegible} • ${g.horario} • ${g.tipo.toUpperCase()}</div>
-          <div class="muted" style="font-size:13px">${g.notas || ''}</div>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
-          <div>
-            <span class="badge ${pendiente <= 0 ? 'b-paid' : 'b-pend'}">${totalEst} est.</span>
-            ${g.finalizado ? '<span class="badge b-final" style="margin-left:6px">Finalizado</span>' : ''}
-          </div>
-          <div class="small muted">Costo: ${formatMoney(costo)} • Recaudado: ${formatMoney(recaudado)}</div>
-        </div>
-      </div>
-
-      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
-        ${!g.finalizado ? `<button onclick="openEditGroup('${g.id}')" class="ghost">Editar</button>` : ''}
-        ${!g.finalizado ? `<button onclick="finalizeGroup('${g.id}')" class="ghost">Finalizar</button>` : ''}
-        <button onclick="openGoogleCalendar('${g.id}')" class="ghost">Agregar a Google Calendar</button>
-        <button onclick="deleteGroup('${g.id}')" class="ghost">Eliminar</button>
-        <div style="margin-left:auto" class="muted small">Pendiente: ${formatMoney(pendiente)}</div>
-      </div>
-
-      <table>
-        <thead><tr><th>Nombre</th><th>Materia</th><th>Pagado (₡)</th><th>Saldo (₡)</th><th>Acción</th></tr></thead>
-        <tbody>
-          ${g.estudiantes.map(s => {
-                    const saldo = (g.tipo === 'individual' ? PRICE_INDIV : PRICE_GRUPAL) - (s.amountPaid || 0);
-                    return `<tr>
-              <td style="text-align:left;padding-left:8px">${escapeHtml(s.nombre)}</td>
-              <td>${escapeHtml(s.materia)}</td>
-              <td>${formatMoney(s.amountPaid || 0)}</td>
-              <td>${formatMoney(saldo)}</td>
-              <td>
-                ${!g.finalizado ? `<button onclick="editStudentPrompt('${g.id}','${s.id}')" class="link-btn">Editar</button>` : ''}
-                ${!g.finalizado ? `<button onclick="registerPaymentPrompt('${g.id}','${s.id}')" class="link-btn">Pagar</button>` : ''}
-                <button onclick="viewStudent('${g.id}','${s.id}')" class="link-btn">Ver</button>
-              </td>
-            </tr>`;
-                }).join('')}
-        </tbody>
-      </table>
-
-      <div style="display:flex;gap:8px;margin-top:8px">
-        ${!g.finalizado ? `<button onclick="quickAddStudent('${g.id}')" class="ghost">Agregar estudiante</button>` : ''}
-        <button onclick="exportGroupCSV('${g.id}')" class="ghost">Exportar grupo CSV</button>
-      </div>
-    `;
-                groupsContainer.appendChild(div);
-            });
+        function leerGrupos() {
+            const crudo = localStorage.getItem(LS_KEY);
+            if (!crudo) return [];
+            const lista = JSON.parse(crudo);
+            if (!Array.isArray(lista)) throw new Error('formato');
+            if (lista.some(g => g.precio === undefined) && !localStorage.getItem(LS_COPIA)) {
+                localStorage.setItem(LS_COPIA, crudo); // copia intacta antes de migrar
+            }
+            return lista.filter(grupoValido).map(normalizarGrupo);
         }
 
-        /* ---------- calendar rendering (monthly) ---------- */
-        function renderCalendar() {
-            calendarGrid.innerHTML = '';
-            const { year, month } = calendarState;
-            const firstDay = new Date(year, month, 1).getDay(); // 0 sunday
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
+        function leerAjustes() {
+            const base = { precioGrupal: 8000, precioIndividual: 16000, maxGrupal: 5, ultimoRespaldo: null };
+            try { return { ...base, ...JSON.parse(localStorage.getItem(LS_AJUSTES) || '{}') }; } catch { return base; }
+        }
 
-            document.getElementById('currentMonth').innerText = new Date(year, month, 1).toLocaleDateString('es-CR', { month: 'long', year: 'numeric' });
+        let errorCarga = false;
+        let grupos = [];
+        try { grupos = leerGrupos(); } catch { errorCarga = true; }
+        let ajustes = leerAjustes();
 
-            // blank slots before month start (assuming week starts on Sunday)
-            for (let i = 0; i < firstDay; i++) { const empty = document.createElement('div'); empty.className = 'cal-day'; calendarGrid.appendChild(empty); }
-
-            for (let d = 1; d <= daysInMonth; d++) {
-                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-                const cell = document.createElement('div'); cell.className = 'cal-day';
-                cell.innerHTML = `<div class="date">${d}</div>`;
-                // events for that date
-                const events = grupos.filter(g => g.fecha === dateStr);
-                events.forEach(ev => {
-                    const evDiv = document.createElement('div'); evDiv.className = 'cal-event';
-                    evDiv.innerText = `${ev.horario} • ${ev.tipo} • ${ev.estudiantes.length} est.`;
-                    evDiv.onclick = () => { scrollToGroup(ev.id); };
-                    cell.appendChild(evDiv);
-                });
-                calendarGrid.appendChild(cell);
+        function guardar() {
+            if (errorCarga) return; // nunca sobrescribir datos que no se pudieron leer
+            grupos.forEach(g => g.estudiantes.forEach(s => { s.amountPaid = pagado(s); }));
+            try {
+                localStorage.setItem(LS_KEY, JSON.stringify(grupos));
+                localStorage.setItem(LS_AJUSTES, JSON.stringify(ajustes));
+            } catch {
+                aviso('No se pudo guardar. Descargue un respaldo para no perder cambios.');
             }
         }
 
-        /* ---------- reminders (today / tomorrow) ---------- */
-        function renderReminders() {
-            remindersDiv.innerHTML = '';
-            alertsContainer.innerHTML = '';
-            const today = new Date();
-            const isoToday = today.toISOString().split('T')[0];
-            const isoTomorrow = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1).toISOString().split('T')[0];
+        /* ---------- Cálculos ---------- */
+        const pagado = s => s.pagos.reduce((t, p) => t + p.monto, 0);
+        const saldo = (g, s) => g.precio - pagado(s);
+        const cupo = g => g.tipo === 'individual' ? 1 : ajustes.maxGrupal;
+        const grupo = id => grupos.find(g => g.id === id);
+        const alumno = (g, id) => g && g.estudiantes.find(s => s.id === id);
+        const pendienteGrupo = g => g.estudiantes.reduce((t, s) => t + Math.max(0, saldo(g, s)), 0);
+        const cobradoGrupo = g => g.estudiantes.reduce((t, s) => t + pagado(s), 0);
+        const terminada = g => g.finalizado || new Date() >= fin(g);
+        const enCurso = g => !g.finalizado && new Date() >= inicio(g) && new Date() < fin(g);
+        function estadoPago(g, s) {
+            if (saldo(g, s) <= 0) return 'pagado';
+            return pagado(s) > 0 ? 'parcial' : 'pendiente';
+        }
+        function deudas() {
+            const mapa = new Map();
+            grupos.forEach(g => g.estudiantes.forEach(s => {
+                const monto = saldo(g, s);
+                if (monto <= 0) return;
+                const clave = plano(s.nombre);
+                if (!mapa.has(clave)) mapa.set(clave, { nombre: s.nombre, total: 0, lineas: [] });
+                const d = mapa.get(clave);
+                d.total += monto;
+                d.lineas.push({ g, s, monto });
+            }));
+            const lista = [...mapa.values()];
+            lista.forEach(d => d.lineas.sort((a, b) => orden(a.g, b.g)));
+            return lista.sort((a, b) => b.total - a.total);
+        }
+        function choques(fecha, horario, excluir) {
+            const [a, b] = horario.split('-');
+            return grupos.filter(g => {
+                if (g.id === excluir || g.fecha !== fecha) return false;
+                const [c, d] = rangoHoras(g);
+                return a < d && c < b;
+            });
+        }
 
-            const upcoming = grupos.filter(g => g.fecha === isoToday || g.fecha === isoTomorrow).sort((a, b) => a.fecha.localeCompare(b.fecha));
+        /* ---------- Componentes ---------- */
+        function asientos(g) {
+            const total = Math.max(cupo(g), g.estudiantes.length);
+            const llenos = g.estudiantes.map(s => `<span class="seat ${estadoPago(g, s)}"></span>`);
+            const libres = Array(total - g.estudiantes.length).fill('<span class="seat"></span>');
+            const pagados = g.estudiantes.filter(s => saldo(g, s) <= 0).length;
+            return `<span class="seats" role="img" aria-label="${g.estudiantes.length} de ${total} cupos, ${pagados} al día">${llenos.join('')}${libres.join('')}</span>`;
+        }
 
-            if (upcoming.length === 0) {
-                remindersDiv.innerHTML = '<div class="muted">No hay clases para hoy o mañana.</div>';
+        function titulo(g) {
+            if (!g.estudiantes.length) return 'Sin estudiantes';
+            return g.estudiantes.map(s => s.nombre).join(', ');
+        }
+
+        function subtitulo(g) {
+            const materias = [...new Set(g.estudiantes.map(s => s.materia).filter(Boolean))];
+            return [g.tipo === 'grupal' ? 'Grupal' : 'Individual', ...materias].join(' · ');
+        }
+
+        function filaClase(g, conFecha = false) {
+            const [a, b] = rangoHoras(g);
+            const pend = pendienteGrupo(g);
+            const izq = conFecha
+                ? `<b>${esc(fechaCorta(g.fecha))}</b><small>${hora12(a)}</small>`
+                : `<b>${hora12(a)}</b><small>${hora12(b)}</small>`;
+            let marca = '';
+            if (enCurso(g)) marca = '<span class="tag brand">En curso</span>';
+            else if (pend > 0) marca = `<span class="tag amber num">${dinero(pend)}</span>`;
+            else if (g.estudiantes.length) marca = '<span class="tag green">Al día</span>';
+            return `<button class="clase ${terminada(g) ? 'pasada' : ''}" data-act="abrir" data-id="${esc(g.id)}">
+                <span class="clase-t">${izq}</span>
+                <span class="clase-m"><b>${esc(titulo(g))}</b><small>${esc(subtitulo(g))}</small></span>
+                <span class="clase-r">${asientos(g)}${marca}</span>
+            </button>`;
+        }
+
+        const listaClases = (arr, conFecha) => `<div class="card lista">${arr.map(g => filaClase(g, conFecha)).join('')}</div>`;
+
+        /* ---------- Vista: Inicio ---------- */
+        function renderInicio() {
+            if (errorCarga) {
+                $('v-inicio').innerHTML = `<div class="card vacio"><b>No se pudieron leer los datos guardados</b>
+                    Sus datos no se modificaron. Restaure un respaldo desde la sección Datos.</div>`;
                 return;
             }
+            const h = hoy(), manana = sumarDias(h, 1), limite = sumarDias(h, 7);
+            const deHoy = grupos.filter(g => g.fecha === h).sort(orden);
+            const deManana = grupos.filter(g => g.fecha === manana).sort(orden);
+            const proximas = grupos.filter(g => g.fecha > manana && g.fecha <= limite).sort(orden);
 
-            upcoming.forEach(g => {
-                const when = g.fecha === isoToday ? 'Hoy' : 'Mañana';
-                const div = document.createElement('div'); div.className = 'alert';
-                div.innerHTML = `<strong>${when}:</strong> Clase ${g.fecha} • ${g.horario} • ${g.tipo} — ${g.estudiantes.length} estudiante(s). <div style="margin-top:6px"><button onclick="openGoogleCalendar('${g.id}')" class="ghost">Agregar a Google Calendar</button> <button onclick="scrollToGroup('${g.id}')" class="ghost">Abrir grupo</button></div>`;
-                remindersDiv.appendChild(div);
+            const d = aFecha(h);
+            const lunes = sumarDias(h, -((d.getDay() + 6) % 7));
+            const domingo = sumarDias(lunes, 6);
+            const semana = grupos.filter(g => g.fecha >= lunes && g.fecha <= domingo).length;
+            const mes = h.slice(0, 7);
+            const cobrado = grupos.reduce((t, g) => t + g.estudiantes.reduce((u, s) => u + s.pagos.filter(p => p.fecha.startsWith(mes)).reduce((v, p) => v + p.monto, 0), 0), 0);
+            const lista = deudas();
+            const porCobrar = lista.reduce((t, x) => t + x.total, 0);
 
-                // banner also on top
-                const banner = document.createElement('div'); banner.className = 'alert';
-                banner.style.borderLeft = '4px solid var(--primary)';
-                banner.innerHTML = `<strong>Recordatorio:</strong> ${when} • ${g.fecha} • ${g.horario} • ${g.tipo} • ${g.estudiantes.length} est.`;
-                alertsContainer.appendChild(banner);
+            const pendientesHoy = deHoy.filter(g => !terminada(g));
+            let resumen = 'Hoy no hay clases.';
+            if (deHoy.length) {
+                resumen = `Hoy: ${plural(deHoy.length, 'clase', 'clases')}.`;
+                if (pendientesHoy.length) resumen += ` La siguiente es a las ${hora12(rangoHoras(pendientesHoy[0])[0])}.`;
+                else resumen += ' Ya terminaron todas.';
+            }
+
+            const respaldoViejo = grupos.length && (!ajustes.ultimoRespaldo ||
+                (aFecha(h) - aFecha(ajustes.ultimoRespaldo)) / 864e5 >= DIAS_RESPALDO);
+            const seccion = (nombre, arr) => arr.length ? `<div class="sec-h"><h2>${nombre}</h2></div>${listaClases(arr, false)}` : '';
+
+            let agenda;
+            if (!grupos.length) {
+                agenda = `<div class="card vacio"><b>Empiece creando su primera clase</b>Después podrá agregar estudiantes y registrar pagos.<br>
+                    <button class="btn primary" data-act="nuevaClase">${icono('mas')}Nueva clase</button></div>`;
+            } else if (!deHoy.length && !deManana.length && !proximas.length) {
+                agenda = `<div class="card vacio"><b>Semana libre</b>No hay clases en los próximos 7 días.<br>
+                    <button class="btn primary" data-act="nuevaClase">${icono('mas')}Nueva clase</button></div>`;
+            } else {
+                agenda = seccion('Hoy', deHoy) + seccion('Mañana', deManana) +
+                    (proximas.length ? `<div class="sec-h"><h2>Próximos días</h2><button class="link" data-act="ir" data-view="clases">Ver todas</button></div>${listaClases(proximas, true)}` : '');
+            }
+
+            const lateral = lista.length ? `<div class="sec-h"><h2>Por cobrar</h2><button class="link" data-act="ir" data-view="cobros">Ver todo</button></div>
+                <div class="card lista">${lista.slice(0, 6).map(x => `<button class="mini-deuda" data-act="ir" data-view="cobros"><span>${esc(x.nombre)}</span><b>${dinero(x.total)}</b></button>`).join('')}</div>`
+                : (grupos.length ? `<div class="sec-h"><h2>Por cobrar</h2></div><div class="card vacio"><b>Todo al día</b>No hay saldos pendientes.</div>` : '');
+
+            $('v-inicio').innerHTML = `
+                ${respaldoViejo ? `<div class="banner"><span>Sus datos están solo en este navegador. Último respaldo: ${ajustes.ultimoRespaldo ? esc(fechaAnio(ajustes.ultimoRespaldo)) : 'nunca'}.</span><button class="btn small" data-act="exportarJSON">Descargar respaldo</button></div>` : ''}
+                <div class="page-h">
+                    <div><h1 style="text-transform:none">${esc(capital(fechaLarga(h)))}</h1><p>${esc(resumen)}</p></div>
+                    <button class="btn primary" data-act="nuevaClase">${icono('mas')}Nueva clase</button>
+                </div>
+                <div class="stats">
+                    <div class="card stat"><small>Cobrado este mes</small><b>${dinero(cobrado)}</b></div>
+                    <button class="card stat ${porCobrar > 0 ? 'alerta' : ''}" data-act="ir" data-view="cobros"><small>Por cobrar</small><b>${dinero(porCobrar)}</b></button>
+                    <div class="card stat"><small>Clases esta semana</small><b>${semana}</b></div>
+                </div>
+                <div class="cols"><div>${agenda}</div><div>${lateral}</div></div>`;
+        }
+        const capital = s => s.charAt(0).toUpperCase() + s.slice(1);
+
+        /* ---------- Vista: Calendario ---------- */
+        const hoyDate = new Date();
+        const E = {
+            vista: 'inicio',
+            anio: hoyDate.getFullYear(),
+            mes: hoyDate.getMonth(),
+            dia: iso(hoyDate),
+            detalle: null,
+            editando: null,
+            alumno: null,
+            pago: null,
+        };
+
+        function claseEvento(g) {
+            if (!g.estudiantes.length) return 'vacia';
+            return pendienteGrupo(g) > 0 ? 'debe' : '';
+        }
+
+        function renderCalendario() {
+            const { anio, mes } = E;
+            $('calMes').textContent = new Date(anio, mes, 1).toLocaleDateString('es-CR', { month: 'long', year: 'numeric' });
+            const nombres = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+            const huecos = (new Date(anio, mes, 1).getDay() + 6) % 7;
+            const dias = new Date(anio, mes + 1, 0).getDate();
+            const h = hoy();
+            let html = nombres.map(n => `<div class="cal-dow">${n}</div>`).join('');
+            html += '<div class="cal-day fuera"></div>'.repeat(huecos);
+            for (let d = 1; d <= dias; d++) {
+                const f = `${anio}-${pad(mes + 1)}-${pad(d)}`;
+                const delDia = grupos.filter(g => g.fecha === f).sort(orden);
+                const clases = ['cal-day', f === h ? 'hoy' : '', f === E.dia ? 'sel' : ''].join(' ');
+                const etiqueta = `${d}${delDia.length ? ', ' + plural(delDia.length, 'clase', 'clases') : ''}`;
+                html += `<button class="${clases}" data-act="dia" data-fecha="${f}" aria-label="${etiqueta}" ${f === E.dia ? 'aria-pressed="true"' : 'aria-pressed="false"'}>
+                    <span class="cal-n">${d}</span>
+                    ${delDia.slice(0, 3).map(g => `<span class="cal-ev ${claseEvento(g)}">${hora12(rangoHoras(g)[0])}</span>`).join('')}
+                    ${delDia.length > 3 ? `<span class="cal-ev vacia">+${delDia.length - 3} más</span>` : ''}
+                    ${delDia.length ? `<span class="cal-dots">${delDia.slice(0, 4).map(g => `<span class="cal-dot ${claseEvento(g)}"></span>`).join('')}</span>` : ''}
+                </button>`;
+            }
+            const resto = (7 - ((huecos + dias) % 7)) % 7;
+            html += '<div class="cal-day fuera"></div>'.repeat(resto);
+            $('calGrid').innerHTML = html;
+
+            const delDia = grupos.filter(g => g.fecha === E.dia).sort(orden);
+            $('dayPanel').innerHTML = `<div class="day-h"><h2>${esc(fechaLarga(E.dia))}</h2></div>
+                ${delDia.length ? delDia.map(g => filaClase(g)).join('') : '<div class="vacio">Sin clases este día.</div>'}
+                <div class="day-f"><button class="btn block" data-act="nuevaClase" data-fecha="${E.dia}">${icono('mas')}Agregar clase este día</button></div>`;
+        }
+
+        /* ---------- Vista: Clases ---------- */
+        function renderClases() {
+            const q = plano($('fBuscar').value), tipo = $('fTipo').value, estado = $('fEstado').value,
+                pago = $('fPago').value, desde = $('fDesde').value, hasta = $('fHasta').value;
+            let arr = grupos.filter(g => {
+                if (q && !g.estudiantes.some(s => plano(s.nombre).includes(q) || plano(s.materia).includes(q))) return false;
+                if (tipo && g.tipo !== tipo) return false;
+                if (estado === 'proxima' && terminada(g)) return false;
+                if (estado === 'finalizada' && !terminada(g)) return false;
+                if (pago === 'debe' && pendienteGrupo(g) <= 0) return false;
+                if (pago === 'aldia' && pendienteGrupo(g) > 0) return false;
+                if (desde && g.fecha < desde) return false;
+                if (hasta && g.fecha > hasta) return false;
+                return true;
+            });
+            const proximas = arr.filter(g => !terminada(g)).sort(orden);
+            const pasadas = arr.filter(terminada).sort((a, b) => orden(b, a));
+            const hayFiltros = q || tipo || estado || pago || desde || hasta;
+            $('fConteo').textContent = plural(arr.length, 'clase', 'clases');
+            $('fLimpiar').hidden = !hayFiltros;
+
+            if (!arr.length) {
+                $('clasesLista').innerHTML = `<div class="card vacio"><b>${hayFiltros ? 'Sin resultados' : 'Todavía no hay clases'}</b>${hayFiltros ? 'Pruebe con otros filtros.' : 'Cree la primera para empezar.'}</div>`;
+                return;
+            }
+            const porMes = lista => {
+                const bloques = new Map();
+                lista.forEach(g => {
+                    const m = g.fecha.slice(0, 7);
+                    if (!bloques.has(m)) bloques.set(m, []);
+                    bloques.get(m).push(g);
+                });
+                return [...bloques].map(([m, l]) => `<div class="mes-h">${esc(capital(aFecha(m + '-01').toLocaleDateString('es-CR', { month: 'long', year: 'numeric' })))}</div>${listaClases(l, true)}`).join('');
+            };
+            $('clasesLista').innerHTML =
+                (proximas.length ? `<div class="sec-h"><h2>Próximas</h2></div>${porMes(proximas)}` : '') +
+                (pasadas.length ? `<div class="sec-h"><h2>Finalizadas</h2></div>${porMes(pasadas)}` : '');
+        }
+
+        /* ---------- Vista: Cobros ---------- */
+        function renderCobros() {
+            const lista = deudas();
+            const total = lista.reduce((t, x) => t + x.total, 0);
+            const cabecera = `<div class="page-h"><div><h1>Cobros</h1>
+                <p>${lista.length ? `${dinero(total)} por cobrar a ${plural(lista.length, 'estudiante', 'estudiantes')}.` : 'Saldos pendientes por estudiante.'}</p></div></div>`;
+            if (!lista.length) {
+                $('v-cobros').innerHTML = cabecera + '<div class="card vacio"><b>Todo al día</b>No hay saldos pendientes.</div>';
+                return;
+            }
+            $('v-cobros').innerHTML = cabecera + lista.map(x => `<div class="card deuda">
+                <div class="deuda-h"><b>${esc(x.nombre)}</b>
+                    <div class="linea-r"><span class="monto">${dinero(x.total)}</span>${x.lineas.length > 1 ? `<button class="btn small" data-act="cobrarTodo" data-nombre="${esc(plano(x.nombre))}">Cobrar todo</button>` : ''}</div></div>
+                ${x.lineas.map(l => `<div class="linea">
+                    <button class="linea-a" data-act="abrir" data-id="${esc(l.g.id)}"><b>${esc(fechaCorta(l.g.fecha))} · ${hora12(rangoHoras(l.g)[0])}</b><small>${esc(l.s.materia)}${terminada(l.g) ? '' : ' · Clase próxima'}</small></button>
+                    <div class="linea-r"><span class="num">${dinero(l.monto)}</span><button class="btn small primary" data-act="pagar" data-id="${esc(l.g.id)}" data-sid="${esc(l.s.id)}">Cobrar</button></div>
+                </div>`).join('')}
+            </div>`).join('');
+        }
+
+        /* ---------- Vista: Datos ---------- */
+        function renderDatos() {
+            $('aGrupal').value = ajustes.precioGrupal;
+            $('aIndividual').value = ajustes.precioIndividual;
+            $('aMax').value = ajustes.maxGrupal;
+            $('ultimoRespaldo').textContent = `Último respaldo: ${ajustes.ultimoRespaldo ? fechaAnio(ajustes.ultimoRespaldo) : 'nunca'}.`;
+            const estudiantes = grupos.reduce((t, g) => t + g.estudiantes.length, 0);
+            const unicos = new Set(grupos.flatMap(g => g.estudiantes.map(s => plano(s.nombre)))).size;
+            const cobrado = grupos.reduce((t, g) => t + cobradoGrupo(g), 0);
+            const pendiente = grupos.reduce((t, g) => t + pendienteGrupo(g), 0);
+            $('totales').innerHTML = [
+                ['Clases', grupos.length],
+                ['Cupos ocupados', estudiantes],
+                ['Estudiantes distintos', unicos],
+                ['Cobrado', dinero(cobrado)],
+                ['Por cobrar', dinero(pendiente)],
+            ].map(([k, v]) => `<div class="kv"><span>${k}</span><b>${v}</b></div>`).join('');
+        }
+
+        /* ---------- Detalle de clase ---------- */
+        function renderDetalle() {
+            const g = grupo(E.detalle);
+            if (!g) { if ($('dlgDetalle').open) $('dlgDetalle').close(); return; }
+            const total = g.precio * g.estudiantes.length;
+            const lleno = g.estudiantes.length >= cupo(g);
+            const estado = enCurso(g) ? '<span class="tag brand">En curso</span>'
+                : terminada(g) ? '<span class="tag">Finalizada</span>' : '<span class="tag green">Próxima</span>';
+            const reabrible = g.finalizado && new Date() < fin(g);
+
+            const filas = g.estudiantes.map(s => {
+                const sal = saldo(g, s), est = estadoPago(g, s);
+                const texto = est === 'pagado'
+                    ? (sal < 0 ? `A favor ${dinero(-sal)}` : 'Pagado')
+                    : `Debe ${dinero(sal)}`;
+                return `<div class="alumno">
+                    <span class="seat ${est}"></span>
+                    <div class="alumno-i"><b>${esc(s.nombre)}</b><small class="num">${esc(s.materia)} · ${texto}</small></div>
+                    <button class="btn small ${est === 'pagado' ? '' : 'primary'}" data-act="pagar" data-id="${esc(g.id)}" data-sid="${esc(s.id)}">${est === 'pagado' ? 'Pagos' : 'Cobrar'}</button>
+                    <button class="icon-btn" data-act="editarAlumno" data-sid="${esc(s.id)}" aria-label="Editar a ${esc(s.nombre)}">${icono('lapiz')}</button>
+                </div>`;
+            }).join('');
+
+            $('detalle').innerHTML = `
+                <header class="sheet-h">
+                    <div>
+                        <h2 id="dTitulo">${esc(fechaLarga(g.fecha))}</h2>
+                        <p class="num">${textoHorario(g.horario)} · ${g.tipo === 'grupal' ? 'Grupal' : 'Individual'} · ${dinero(g.precio)} ${g.tipo === 'grupal' ? 'por estudiante' : ''} ${estado}</p>
+                    </div>
+                    <button class="icon-btn" data-act="cerrar" aria-label="Cerrar">${icono('x')}</button>
+                </header>
+                <div class="sheet-b">
+                    <div class="resumen">
+                        <div><small>Total</small><b>${dinero(total)}</b></div>
+                        <div><small>Cobrado</small><b>${dinero(cobradoGrupo(g))}</b></div>
+                        <div><small>Pendiente</small><b>${dinero(pendienteGrupo(g))}</b></div>
+                    </div>
+                    <div>
+                        <div class="sec-h"><h2>Estudiantes</h2><span class="muted num">${g.estudiantes.length} de ${cupo(g)}</span></div>
+                        ${filas || '<p class="muted">Todavía no hay estudiantes en esta clase.</p>'}
+                        <div style="margin-top:10px">
+                            ${lleno ? '<span class="muted">Cupo lleno.</span>' : `<button class="btn block" data-act="agregarAlumno">${icono('mas')}Agregar estudiante</button>`}
+                        </div>
+                    </div>
+                    <label class="field"><span>Notas</span><textarea class="input" id="dNotas" rows="2" placeholder="Temas vistos, tareas, observaciones…">${esc(g.notas)}</textarea></label>
+                    <div class="acciones">
+                        <button class="btn small" data-act="editarClase">${icono('lapiz')}Editar clase</button>
+                        <button class="btn small" data-act="googleCal">Agregar a Google Calendar</button>
+                        <button class="btn small" data-act="repetirClase">Repetir en 7 días</button>
+                        <button class="btn small" data-act="exportarGrupoCSV">Exportar CSV</button>
+                        ${reabrible ? '<button class="btn small" data-act="reabrir">Reabrir</button>'
+                    : (!terminada(g) ? '<button class="btn small" data-act="finalizar">Marcar finalizada</button>' : '')}
+                        <button class="btn small danger" data-act="eliminarClase">${icono('basura')}Eliminar</button>
+                    </div>
+                </div>`;
+        }
+
+        function abrirDetalle(id) {
+            E.detalle = id;
+            renderDetalle();
+            if (!$('dlgDetalle').open) $('dlgDetalle').showModal();
+            $('dlgDetalle').append($('toast')); // el aviso debe seguir siendo clicable sobre el diálogo
+        }
+
+        /* ---------- Formulario de clase ---------- */
+        function pintarSlots() {
+            $('cSlots').innerHTML = HORARIOS.map(h => `<label class="chip"><input type="radio" name="slot" value="${h}" /><span>${textoHorario(h)}</span></label>`).join('') +
+                '<label class="chip"><input type="radio" name="slot" value="otro" /><span>Otro horario</span></label>';
+        }
+        const radio = nombre => document.querySelector(`input[name="${nombre}"]:checked`);
+        function leerHorario() {
+            const r = radio('slot');
+            if (!r) return '';
+            if (r.value !== 'otro') return r.value;
+            const a = $('cIni').value, b = $('cFin').value;
+            return a && b ? `${a}-${b}` : '';
+        }
+        function revisarChoque() {
+            const horario = leerHorario(), fecha = $('cFecha').value;
+            const lista = fecha && horario ? choques(fecha, horario, E.editando) : [];
+            $('cAviso').hidden = !lista.length;
+            if (lista.length) $('cAviso').textContent = `Ya hay una clase de ${textoHorario(lista[0].horario)} ese día. Puede guardarla de todos modos.`;
+        }
+        function abrirFormClase(g, fecha) {
+            E.editando = g ? g.id : null;
+            $('formClase').reset();
+            $('cError').hidden = true;
+            $('dlgClaseT').textContent = g ? 'Editar clase' : 'Nueva clase';
+            $('cGuardar').textContent = g ? 'Guardar cambios' : 'Crear clase';
+            $('cRepetirBox').hidden = !!g;
+            $('cFecha').value = g ? g.fecha : (fecha || hoy());
+            const tipo = g ? g.tipo : 'grupal';
+            document.querySelector(`input[name="tipo"][value="${tipo}"]`).checked = true;
+            $('cPrecio').value = g ? g.precio : ajustes.precioGrupal;
+            $('cNotas').value = g ? g.notas : '';
+            if (g) {
+                const estandar = HORARIOS.includes(g.horario);
+                document.querySelector(`input[name="slot"][value="${estandar ? g.horario : 'otro'}"]`).checked = true;
+                [$('cIni').value, $('cFin').value] = rangoHoras(g);
+                $('cOtro').hidden = estandar;
+            } else {
+                $('cOtro').hidden = true;
+            }
+            revisarChoque();
+            $('dlgClase').showModal();
+        }
+
+        /* ---------- Formulario de estudiante ---------- */
+        function abrirFormAlumno(g, s) {
+            E.alumno = s ? s.id : null;
+            $('formAlumno').reset();
+            $('eError').hidden = true;
+            $('dlgAlumnoT').textContent = s ? 'Editar estudiante' : 'Agregar estudiante';
+            $('eGuardar').textContent = s ? 'Guardar' : 'Agregar';
+            $('eQuitar').hidden = !s;
+            $('ePagoBox').hidden = !!s;
+            $('ePagoBtn').textContent = `Pagó completo: ${dinero(g.precio)}`;
+            $('eNombre').value = s ? s.nombre : '';
+            $('eMateria').value = s ? s.materia : '';
+            const todos = grupos.flatMap(x => x.estudiantes);
+            const unicos = l => [...new Set(l.filter(Boolean))].sort((a, b) => a.localeCompare(b, 'es'));
+            $('listaNombres').innerHTML = unicos(todos.map(x => x.nombre)).map(n => `<option value="${esc(n)}"></option>`).join('');
+            $('listaMaterias').innerHTML = unicos(todos.map(x => x.materia)).map(n => `<option value="${esc(n)}"></option>`).join('');
+            $('dlgAlumno').showModal();
+        }
+
+        /* ---------- Formulario de pago ---------- */
+        function abrirPago(g, s) {
+            E.pago = { gid: g.id, sid: s.id };
+            $('pError').hidden = true;
+            const sal = Math.max(0, saldo(g, s));
+            $('dlgPagoT').textContent = s.nombre;
+            $('pInfo').textContent = sal > 0 ? `Saldo: ${dinero(sal)} de ${dinero(g.precio)}` : `Al día · ${dinero(pagado(s))} pagados`;
+            $('pMonto').value = sal || '';
+            $('pFecha').value = hoy();
+            $('pAtajos').innerHTML = sal > 1 ? `<button type="button" class="btn small" data-act="montoPago" data-monto="${sal}">Todo: ${dinero(sal)}</button>
+                <button type="button" class="btn small" data-act="montoPago" data-monto="${Math.round(sal / 2)}">Mitad: ${dinero(sal / 2)}</button>` : '';
+            $('pHistorial').innerHTML = s.pagos.length ? `<div class="legend">Pagos registrados</div>` + s.pagos.map(p => `<div class="pago-h">
+                <span class="num">${dinero(p.monto)} <span class="muted">· ${esc(fechaAnio(p.fecha))}</span></span>
+                <button type="button" class="icon-btn" data-act="quitarPago" data-pid="${esc(p.id)}" aria-label="Eliminar pago de ${dinero(p.monto)}">${icono('basura')}</button>
+            </div>`).join('') : '';
+            if (!$('dlgPago').open) $('dlgPago').showModal();
+            $('pMonto').select();
+        }
+
+        /* ---------- Google Calendar y exportaciones ---------- */
+        function fechaGoogle(fecha, h) { return `${fecha.replace(/-/g, '')}T${h.replace(':', '')}00`; }
+        function abrirGoogle(g) {
+            const [a, b] = rangoHoras(g);
+            const lineas = [`Tutoría ${g.tipo}`, ...g.estudiantes.map(s => `- ${s.nombre} (${s.materia})`)];
+            if (g.notas) lineas.push('', `Notas: ${g.notas}`);
+            const nombres = g.estudiantes.map(s => s.nombre).join(', ');
+            const tituloEv = `Tutoría ${g.tipo}${nombres ? ': ' + nombres : ''}`;
+            const url = 'https://calendar.google.com/calendar/render?action=TEMPLATE'
+                + `&text=${encodeURIComponent(tituloEv)}`
+                + `&dates=${fechaGoogle(g.fecha, a)}/${fechaGoogle(g.fecha, b)}`
+                + '&ctz=America/Costa_Rica'
+                + `&details=${encodeURIComponent(lineas.join('\n'))}`;
+            window.open(url, '_blank', 'noopener');
+        }
+
+        function descargar(nombre, contenido, tipo) {
+            const url = URL.createObjectURL(new Blob([contenido], { type: tipo }));
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = nombre;
+            a.click();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+        function aCSV(filas) {
+            return '﻿' + filas.map(r => r.map(c => `"${String(c ?? '').replace(/"/g, '""')}"`).join(',')).join('\r\n');
+        }
+        const CSV_CABECERA = ['Fecha', 'Horario', 'Tipo', 'Estudiante', 'Materia', 'Precio', 'Pagado', 'Saldo'];
+        const filasCSV = g => g.estudiantes.map(s => [g.fecha, g.horario, g.tipo, s.nombre, s.materia, g.precio, pagado(s), saldo(g, s)]);
+
+        /* ---------- Avisos y confirmaciones ---------- */
+        let toastTimer;
+        function aviso(texto, deshacer) {
+            const t = $('toast');
+            const anfitrion = [...document.querySelectorAll('dialog[open]')].pop() || document.body;
+            if (t.parentElement !== anfitrion) anfitrion.append(t);
+            $('toastTxt').textContent = texto;
+            const b = $('toastBtn');
+            b.hidden = !deshacer;
+            b.onclick = deshacer ? () => { deshacer(); t.hidden = true; } : null;
+            t.hidden = false;
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => { t.hidden = true; }, deshacer ? 8000 : 3500);
+        }
+        document.addEventListener('close', e => {
+            const t = $('toast');
+            if (e.target.contains(t)) {
+                ([...document.querySelectorAll('dialog[open]')].pop() || document.body).append(t);
+            }
+        }, true);
+
+        function cambiar(mensaje, fn) {
+            const antes = JSON.stringify(grupos);
+            fn();
+            guardar();
+            render();
+            aviso(mensaje, () => {
+                grupos = JSON.parse(antes).map(normalizarGrupo);
+                guardar();
+                render();
             });
         }
 
-        /* ---------- summary ---------- */
-        function renderSummary() {
-            const totalClases = grupos.length;
-            const totalEst = grupos.reduce((s, g) => s + g.estudiantes.length, 0);
-            const recaudado = grupos.reduce((s, g) => s + g.estudiantes.reduce((x, y) => x + Number(y.amountPaid || 0), 0), 0);
-            const costoTotal = grupos.reduce((s, g) => s + ((g.tipo === 'individual') ? (g.estudiantes.length ? PRICE_INDIV : 0) : (g.estudiantes.length * PRICE_GRUPAL)), 0);
-            const pendiente = costoTotal - recaudado;
-
-            document.getElementById('totalClases').innerText = totalClases;
-            document.getElementById('totalEstudiantes').innerText = totalEst;
-            document.getElementById('totalRecaudado').innerText = formatMoney(recaudado);
-            document.getElementById('totalPendiente').innerText = formatMoney(pendiente);
+        function preguntar(tituloQ, texto, botones) {
+            return new Promise(resolver => {
+                const d = $('dlgConfirmar');
+                $('qTitulo').textContent = tituloQ;
+                $('qTexto').textContent = texto;
+                const pie = $('qBotones');
+                pie.innerHTML = '';
+                let valor = null;
+                botones.forEach(b => {
+                    const el = document.createElement('button');
+                    el.type = 'button';
+                    el.className = 'btn ' + (b.clase || '');
+                    el.textContent = b.texto;
+                    el.onclick = () => { valor = b.valor; d.close(); };
+                    pie.append(el);
+                });
+                d.addEventListener('close', () => resolver(valor), { once: true });
+                d.showModal();
+            });
         }
 
-        /* ---------- acciones (grupos, estudiantes, pagos) ---------- */
-        document.getElementById('formGrupo').addEventListener('submit', e => {
-            e.preventDefault();
-            const fecha = document.getElementById('fecha').value;
-            const horario = document.getElementById('horario').value;
-            const tipo = document.getElementById('tipo').value;
-            if (!fecha || !horario || !tipo) return alert('Complete todos los campos');
-            grupos.push({ id: uid(), fecha, horario, tipo, estudiantes: [], finalizado: false, notas: '' });
-            save(); renderAll();
-            e.target.reset();
+        /* ---------- Navegación y render ---------- */
+        const VISTAS = ['inicio', 'calendario', 'clases', 'cobros', 'datos'];
+        const pintores = { inicio: renderInicio, calendario: renderCalendario, clases: renderClases, cobros: renderCobros, datos: renderDatos };
+
+        function render() {
+            VISTAS.forEach(v => { $('v-' + v).hidden = v !== E.vista; });
+            document.querySelector('.fab').hidden = E.vista === 'calendario' || E.vista === 'datos';
+            document.querySelectorAll('.nav button').forEach(b => {
+                if (b.dataset.view === E.vista) b.setAttribute('aria-current', 'page');
+                else b.removeAttribute('aria-current');
+            });
+            const n = deudas().length;
+            $('navBadge').hidden = !n;
+            $('navBadge').textContent = n;
+            pintores[E.vista]();
+            if (E.detalle && $('dlgDetalle').open) renderDetalle();
+        }
+
+        function irA(vista) {
+            if (location.hash === '#' + vista) { window.scrollTo(0, 0); return; }
+            location.hash = vista;
+        }
+        function leerRuta() {
+            const v = location.hash.slice(1);
+            E.vista = VISTAS.includes(v) ? v : 'inicio';
+            render();
+            window.scrollTo(0, 0);
+        }
+        window.addEventListener('hashchange', leerRuta);
+
+        /* ---------- Acciones ---------- */
+        const actual = () => grupo(E.detalle);
+        const acciones = {
+            ir: d => irA(d.view),
+            nuevaClase: d => abrirFormClase(null, d.fecha),
+            abrir: d => abrirDetalle(d.id),
+            cerrar: (d, el) => el.closest('dialog').close(),
+            dia: d => { E.dia = d.fecha; renderCalendario(); },
+            mes: d => {
+                const f = new Date(E.anio, E.mes + Number(d.delta), 1);
+                E.anio = f.getFullYear();
+                E.mes = f.getMonth();
+                renderCalendario();
+            },
+            mesHoy: () => {
+                const f = new Date();
+                E.anio = f.getFullYear();
+                E.mes = f.getMonth();
+                E.dia = iso(f);
+                renderCalendario();
+            },
+            limpiarFiltros: () => {
+                ['fBuscar', 'fTipo', 'fEstado', 'fPago', 'fDesde', 'fHasta'].forEach(id => { $(id).value = ''; });
+                renderClases();
+            },
+            agregarAlumno: () => abrirFormAlumno(actual()),
+            editarAlumno: d => { const g = actual(); abrirFormAlumno(g, alumno(g, d.sid)); },
+            quitarAlumno: () => {
+                const g = actual();
+                const s = alumno(g, E.alumno);
+                $('dlgAlumno').close();
+                cambiar(`${s.nombre} se quitó de la clase`, () => { g.estudiantes = g.estudiantes.filter(x => x.id !== s.id); });
+            },
+            ePagoCompleto: () => { $('ePago').value = actual().precio; },
+            pagar: d => { const g = grupo(d.id); abrirPago(g, alumno(g, d.sid)); },
+            montoPago: d => { $('pMonto').value = d.monto; },
+            quitarPago: d => {
+                const g = grupo(E.pago.gid), s = alumno(g, E.pago.sid);
+                cambiar('Pago eliminado', () => { s.pagos = s.pagos.filter(p => p.id !== d.pid); });
+                abrirPago(grupo(E.pago.gid), alumno(grupo(E.pago.gid), E.pago.sid));
+            },
+            cobrarTodo: d => {
+                const x = deudas().find(y => plano(y.nombre) === d.nombre);
+                cambiar(`${dinero(x.total)} cobrados a ${x.nombre}`, () => {
+                    x.lineas.forEach(l => l.s.pagos.push({ id: uid(), monto: l.monto, fecha: hoy() }));
+                });
+            },
+            editarClase: () => abrirFormClase(actual()),
+            googleCal: () => abrirGoogle(actual()),
+            repetirClase: () => {
+                const g = actual();
+                const fecha = sumarDias(g.fecha, 7);
+                cambiar(`Clase copiada al ${fechaCorta(fecha)}`, () => {
+                    grupos.push({
+                        ...g, id: uid(), fecha, finalizado: false,
+                        estudiantes: g.estudiantes.map(s => ({ id: uid(), nombre: s.nombre, materia: s.materia, pagos: [] })),
+                    });
+                });
+            },
+            exportarGrupoCSV: () => {
+                const g = actual();
+                descargar(`clase-${g.fecha}.csv`, aCSV([CSV_CABECERA, ...filasCSV(g)]), 'text/csv;charset=utf-8');
+            },
+            finalizar: () => { const g = actual(); cambiar('Clase finalizada', () => { g.finalizado = true; }); },
+            reabrir: () => { const g = actual(); cambiar('Clase reabierta', () => { g.finalizado = false; }); },
+            eliminarClase: () => {
+                const g = actual();
+                $('dlgDetalle').close();
+                cambiar('Clase eliminada', () => { grupos = grupos.filter(x => x.id !== g.id); });
+            },
+            exportarJSON: () => {
+                const datos = { app: 'tutorias', version: 2, exportado: new Date().toISOString(), ajustes, grupos };
+                descargar(`tutorias-respaldo-${hoy()}.json`, JSON.stringify(datos, null, 2), 'application/json');
+                ajustes.ultimoRespaldo = hoy();
+                guardar();
+                render();
+                aviso('Respaldo descargado');
+            },
+            exportarTodoCSV: () => {
+                const filas = grupos.slice().sort(orden).flatMap(filasCSV);
+                descargar(`tutorias-${hoy()}.csv`, aCSV([CSV_CABECERA, ...filas]), 'text/csv;charset=utf-8');
+            },
+            elegirImport: () => $('fileImport').click(),
+            borrarTodo: async () => {
+                const r = await preguntar('¿Borrar todos los datos?', `Se eliminarán ${plural(grupos.length, 'clase', 'clases')} con sus estudiantes y pagos.`, [
+                    { texto: 'Cancelar', valor: null },
+                    { texto: 'Borrar todo', valor: 'si', clase: 'danger-solid' },
+                ]);
+                if (r === 'si') cambiar('Datos borrados', () => { grupos = []; });
+            },
+        };
+
+        document.addEventListener('click', e => {
+            const el = e.target.closest('[data-act]');
+            if (el && acciones[el.dataset.act]) acciones[el.dataset.act](el.dataset, el);
         });
 
-        function quickAddStudent(groupId) {
-            const g = grupos.find(x => x.id === groupId); if (!g) return alert('Grupo no encontrado');
-            if (g.finalizado) return alert('Grupo finalizado');
-            const name = prompt('Nombre del estudiante:'); if (!name) return;
-            const mater = prompt('Materia:', 'Matemáticas'); if (mater === null) return;
-            let paid = prompt('Monto pagado (₡) - dejar vacío = 0', '0'); if (paid === null) return;
-            paid = Number(paid) || 0;
-            if (g.tipo === 'individual' && g.estudiantes.length >= 1) return alert('Grupo individual ya tiene estudiante');
-            if (g.tipo === 'grupal' && g.estudiantes.length >= 5) return alert('Máximo 5 estudiantes');
-            g.estudiantes.push({ id: uid(), nombre: name.trim(), materia: mater.trim(), amountPaid: paid });
-            save(); renderAll();
+        /* ---------- Formularios ---------- */
+        function error(id, texto) {
+            $(id).textContent = texto;
+            $(id).hidden = false;
         }
 
-        document.getElementById('btnQuickAdd').addEventListener('click', () => {
-            const name = document.getElementById('quickName').value.trim();
-            const mater = document.getElementById('quickMater').value.trim();
-            const paid = Number(document.getElementById('quickPaid').value || 0);
-            if (!name || !mater) return alert('Nombre y materia requeridos');
-            if (grupos.length === 0) return alert('No hay grupos. Crea uno primero.');
-            const g = grupos[0];
-            if (g.finalizado) return alert('Primer grupo finalizado');
-            if (g.tipo === 'individual' && g.estudiantes.length >= 1) return alert('Primer grupo ya tiene 1 estudiante');
-            if (g.tipo === 'grupal' && g.estudiantes.length >= 5) return alert('Primer grupo ya tiene 5 estudiantes');
-            g.estudiantes.push({ id: uid(), nombre: name, materia: mater, amountPaid: paid });
-            save(); renderAll();
-            document.getElementById('quickName').value = ''; document.getElementById('quickMater').value = ''; document.getElementById('quickPaid').value = '';
+        $('dlgDetalle').addEventListener('click', e => { if (e.target === $('dlgDetalle')) $('dlgDetalle').close(); });
+        $('dlgDetalle').addEventListener('close', () => { E.detalle = null; });
+        $('detalle').addEventListener('change', e => {
+            if (e.target.id !== 'dNotas') return;
+            const g = actual();
+            if (g) { g.notas = e.target.value; guardar(); }
         });
 
-        function editStudentPrompt(groupId, studentId) {
-            const g = grupos.find(x => x.id === groupId); if (!g) return;
-            const s = g.estudiantes.find(x => x.id === studentId); if (!s) return;
-            const nuevo = prompt('Nombre:', s.nombre); if (nuevo === null) return;
-            const materia = prompt('Materia:', s.materia); if (materia === null) return;
-            s.nombre = nuevo.trim(); s.materia = materia.trim();
-            save(); renderAll();
-        }
-
-        function registerPaymentPrompt(groupId, studentId) {
-            const g = grupos.find(x => x.id === groupId); if (!g) return;
-            const s = g.estudiantes.find(x => x.id === studentId); if (!s) return;
-            const monto = prompt(`Registrar pago para ${s.nombre}. Monto actual: ${formatMoney(s.amountPaid || 0)}. Ingrese monto a sumar (₡):`, '0');
-            if (monto === null) return;
-            const v = Number(monto) || 0;
-            s.amountPaid = Number(s.amountPaid || 0) + v;
-            save(); renderAll();
-        }
-
-        function viewStudent(groupId, studentId) {
-            const g = grupos.find(x => x.id === groupId); if (!g) return;
-            const s = g.estudiantes.find(x => x.id === studentId); if (!s) return;
-            alert(`Estudiante: ${s.nombre}\nMateria: ${s.materia}\nPagado: ${formatMoney(s.amountPaid || 0)}\nSaldo: ${formatMoney((g.tipo === 'individual' ? PRICE_INDIV : PRICE_GRUPAL) - (s.amountPaid || 0))}`);
-        }
-
-        function openEditGroup(groupId) {
-            const g = grupos.find(x => x.id === groupId); if (!g) return;
-            const notas = prompt('Notas/observaciones (opcional):', g.notas || '');
-            if (notas === null) return;
-            g.notas = notas;
-            save(); renderAll();
-        }
-
-        function deleteGroup(groupId) {
-            if (!confirm('¿Eliminar grupo?')) return;
-            grupos = grupos.filter(x => x.id !== groupId);
-            save(); renderAll();
-        }
-
-        function finalizeGroup(groupId) {
-            if (!confirm('¿Marcar este grupo como finalizado?')) return;
-            const g = grupos.find(x => x.id === groupId); if (!g) return;
-            g.finalizado = true; save(); renderAll();
-        }
-
-        /* ---------- search & filters ---------- */
-        document.getElementById('searchInput').addEventListener('input', e => {
-            const q = e.target.value.trim().toLowerCase();
-            if (!q) { renderAll(); return; }
-            const found = grupos.filter(g => g.estudiantes.some(s => s.nombre.toLowerCase().includes(q)));
-            renderGroups(found);
-        });
-
-        document.getElementById('btnApplyFilters').addEventListener('click', () => {
-            const from = document.getElementById('filterFrom').value;
-            const to = document.getElementById('filterTo').value;
-            const tipo = document.getElementById('filterTipo').value;
-            const estado = document.getElementById('filterEstado').value;
-            let filtered = grupos.slice();
-            if (from) filtered = filtered.filter(g => g.fecha >= from);
-            if (to) filtered = filtered.filter(g => g.fecha <= to);
-            if (tipo) filtered = filtered.filter(g => g.tipo === tipo);
-            if (estado) filtered = filtered.filter(g => (estado === 'finalizado') ? g.finalizado : !g.finalizado);
-            renderGroups(filtered);
-        });
-        document.getElementById('btnResetFilters').addEventListener('click', () => {
-            document.getElementById('filterFrom').value = ''; document.getElementById('filterTo').value = ''; document.getElementById('filterTipo').value = ''; document.getElementById('filterEstado').value = '';
-            renderAll();
-        });
-        document.getElementById('btnClear').addEventListener('click', () => document.getElementById('formGrupo').reset());
-
-        /* ---------- calendar navigation ---------- */
-        document.getElementById('prevMonth').addEventListener('click', () => {
-            calendarState.month--; if (calendarState.month < 0) { calendarState.month = 11; calendarState.year--; } renderCalendar();
-        });
-        document.getElementById('nextMonth').addEventListener('click', () => {
-            calendarState.month++; if (calendarState.month > 11) { calendarState.month = 0; calendarState.year++; } renderCalendar();
-        });
-
-        /* ---------- scroll to group in list ---------- */
-        function scrollToGroup(groupId) {
-            const nodes = document.querySelectorAll('#groupsContainer .grupo');
-            for (const n of nodes) {
-                if (n.innerHTML.includes(groupId)) {
-                    n.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    n.style.boxShadow = '0 0 0 3px rgba(11,105,163,0.08)';
-                    setTimeout(() => n.style.boxShadow = '', 1400);
-                    return;
-                }
+        $('formClase').addEventListener('change', e => {
+            if (e.target.name === 'slot') {
+                $('cOtro').hidden = e.target.value !== 'otro';
             }
-            alert('Grupo agregado recientemente. Recarga la página si no lo ves.');
-        }
-
-        /* ---------- Google Calendar integration (prefill) ---------- */
-        /* Uses template URL (no OAuth). Opens event prefilled in user's Google Calendar */
-        function openGoogleCalendar(groupId) {
-            const g = grupos.find(x => x.id === groupId); if (!g) return alert('Grupo no encontrado');
-            const start = dateTimeForURL(g.fecha, g.horario.split('-')[0]); // YYYYMMDDTHHMMSS
-            const end = dateTimeForURL(g.fecha, g.horario.split('-')[1]);
-            const title = encodeURIComponent(`Tutoría ${g.tipo} • ${g.horario}`);
-            const studentsList = g.estudiantes.map(s => `- ${s.nombre} (${s.materia}) Pagó:${formatMoney(s.amountPaid || 0)}`).join('%0A');
-            const desc = encodeURIComponent(`Grupo de tutoría%0AFecha: ${g.fecha}%0AHorario: ${g.horario}%0A${studentsList}%0ANotas: ${g.notas || ''}`);
-            const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&details=${desc}`;
-            window.open(url, '_blank');
-        }
-        function dateTimeForURL(dateStr, timeStr) {
-            // dateStr "YYYY-MM-DD", timeStr "14:00" -> return YYYYMMDDTHHMM00
-            const [y, m, d] = dateStr.split('-');
-            const [hh, mm] = timeStr.split(':');
-            return `${y}${m}${d}T${hh}${mm}00`;
-        }
-
-        /* ---------- export and small utils ---------- */
-        document.getElementById('btnExportAll').addEventListener('click', () => {
-            const blob = new Blob([JSON.stringify(grupos, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'grupos.json'; a.click(); URL.revokeObjectURL(url);
-        });
-        document.getElementById('btnExportJSON').addEventListener('click', () => {
-            const blob = new Blob([JSON.stringify(grupos, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'grupos.json'; a.click(); URL.revokeObjectURL(url);
-        });
-        document.getElementById('btnClearAll').addEventListener('click', () => {
-            if (confirm('Borrar todos los datos guardados?')) { grupos = []; save(); renderAll(); }
+            if (e.target.name === 'tipo') {
+                $('cPrecio').value = e.target.value === 'individual' ? ajustes.precioIndividual : ajustes.precioGrupal;
+            }
+            revisarChoque();
         });
 
-        function exportGroupCSV(groupId) {
-            const g = grupos.find(x => x.id === groupId); if (!g) return;
-            const rows = [['EstudianteID', 'Nombre', 'Materia', 'Pagado']];
-            g.estudiantes.forEach(s => rows.push([s.id, s.nombre, s.materia, s.amountPaid || 0]));
-            const csv = rows.map(r => r.map(c => `"${String(c || '').replace(/"/g, '""')}"`).join(',')).join('\n');
-            const blob = new Blob([csv], { type: 'text/csv' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `grupo_${g.id}.csv`; a.click(); URL.revokeObjectURL(url);
-        }
+        $('formClase').addEventListener('submit', e => {
+            e.preventDefault();
+            $('cError').hidden = true;
+            const fecha = $('cFecha').value;
+            const horario = leerHorario();
+            const tipo = radio('tipo').value;
+            const precio = Number($('cPrecio').value);
+            const notas = $('cNotas').value.trim();
+            if (!fecha) return error('cError', 'Elija una fecha.');
+            if (!horario) return error('cError', 'Elija un horario.');
+            const [a, b] = horario.split('-');
+            if (a >= b) return error('cError', 'La hora de fin debe ser después de la de inicio.');
+            if ($('cPrecio').value === '' || precio < 0) return error('cError', 'Indique un precio válido.');
 
-        function escapeHtml(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
-
-        /* ---------- init render ---------- */
-        renderAll();
-
-        /* ---------- small convenience: scroll search will filter groups by student -------- */
-        document.getElementById('searchInput').addEventListener('input', (e) => {
-            const q = e.target.value.trim().toLowerCase();
-            if (!q) { renderAll(); return; }
-            const found = grupos.filter(g => g.estudiantes.some(s => s.nombre.toLowerCase().includes(q)));
-            renderGroups(found);
+            if (E.editando) {
+                const g = grupo(E.editando);
+                if (tipo === 'individual' && g.estudiantes.length > 1) {
+                    return error('cError', 'Una clase individual solo admite 1 estudiante. Quite los demás primero.');
+                }
+                $('dlgClase').close();
+                cambiar('Clase actualizada', () => { Object.assign(g, { fecha, horario, tipo, precio, notas }); });
+                return;
+            }
+            const repetir = Number($('cRepetir').value);
+            const nueva = { id: uid(), fecha, horario, tipo, precio, notas, finalizado: false, estudiantes: [] };
+            $('dlgClase').close();
+            cambiar(repetir ? `${repetir + 1} clases creadas` : 'Clase creada', () => {
+                grupos.push(nueva);
+                for (let i = 1; i <= repetir; i++) {
+                    grupos.push({ ...nueva, id: uid(), fecha: sumarDias(fecha, 7 * i), estudiantes: [] });
+                }
+            });
+            abrirDetalle(nueva.id);
         });
 
+        $('eNombre').addEventListener('change', () => {
+            if ($('eMateria').value) return;
+            const nombre = plano($('eNombre').value);
+            const previo = grupos.slice().sort((a, b) => orden(b, a)).flatMap(g => g.estudiantes).find(s => plano(s.nombre) === nombre);
+            if (previo) $('eMateria').value = previo.materia;
+        });
+
+        $('formAlumno').addEventListener('submit', e => {
+            e.preventDefault();
+            $('eError').hidden = true;
+            const g = actual();
+            const nombre = $('eNombre').value.trim(), materia = $('eMateria').value.trim();
+            if (!nombre) return error('eError', 'Escriba el nombre.');
+            if (!materia) return error('eError', 'Escriba la materia.');
+            if (E.alumno) {
+                const s = alumno(g, E.alumno);
+                $('dlgAlumno').close();
+                cambiar('Estudiante actualizado', () => { s.nombre = nombre; s.materia = materia; });
+                return;
+            }
+            if (g.estudiantes.length >= cupo(g)) return error('eError', 'La clase ya tiene el cupo lleno.');
+            const monto = Number($('ePago').value) || 0;
+            if (monto < 0) return error('eError', 'El pago no puede ser negativo.');
+            $('dlgAlumno').close();
+            cambiar(`${nombre} agregado a la clase`, () => {
+                g.estudiantes.push({ id: uid(), nombre, materia, pagos: monto ? [{ id: uid(), monto, fecha: hoy() }] : [] });
+            });
+        });
+
+        $('formPago').addEventListener('submit', e => {
+            e.preventDefault();
+            $('pError').hidden = true;
+            const monto = Number($('pMonto').value), fecha = $('pFecha').value;
+            if (!(monto > 0)) return error('pError', 'Escriba un monto mayor a 0.');
+            if (!fecha) return error('pError', 'Elija la fecha del pago.');
+            const g = grupo(E.pago.gid), s = alumno(g, E.pago.sid);
+            $('dlgPago').close();
+            cambiar(`Pago de ${dinero(monto)} registrado`, () => { s.pagos.push({ id: uid(), monto, fecha }); });
+        });
+
+        $('formAjustes').addEventListener('change', () => {
+            const grupal = Number($('aGrupal').value), individual = Number($('aIndividual').value), max = Number($('aMax').value);
+            if (!(grupal >= 0) || !(individual >= 0) || !(max >= 1)) return aviso('Revise los valores.');
+            Object.assign(ajustes, { precioGrupal: grupal, precioIndividual: individual, maxGrupal: Math.floor(max) });
+            guardar();
+            render();
+            aviso('Ajustes guardados');
+        });
+        $('formAjustes').addEventListener('submit', e => e.preventDefault());
+
+        ['fBuscar', 'fTipo', 'fEstado', 'fPago', 'fDesde', 'fHasta'].forEach(id => $(id).addEventListener('input', renderClases));
+
+        $('fileImport').addEventListener('change', async e => {
+            const archivo = e.target.files[0];
+            e.target.value = '';
+            if (!archivo) return;
+            let lista, ajustesArchivo;
+            try {
+                const datos = JSON.parse(await archivo.text());
+                lista = Array.isArray(datos) ? datos : datos.grupos;
+                if (!Array.isArray(lista)) throw new Error('formato');
+                ajustesArchivo = Array.isArray(datos) ? null : datos.ajustes;
+                lista = lista.filter(grupoValido).map(normalizarGrupo);
+            } catch {
+                return aviso('Ese archivo no es un respaldo válido.');
+            }
+            const r = await preguntar('Restaurar respaldo', `El archivo tiene ${plural(lista.length, 'clase', 'clases')}. Actualmente hay ${grupos.length} guardadas.`, [
+                { texto: 'Cancelar', valor: null },
+                { texto: 'Reemplazar todo', valor: 'reemplazar' },
+                { texto: 'Combinar', valor: 'combinar', clase: 'primary' },
+            ]);
+            if (!r) return;
+            errorCarga = false;
+            cambiar('Respaldo restaurado', () => {
+                if (r === 'reemplazar') {
+                    grupos = lista;
+                    if (ajustesArchivo) ajustes = { ...ajustes, ...ajustesArchivo };
+                } else {
+                    const ids = new Set(grupos.map(g => g.id));
+                    grupos.push(...lista.filter(g => !ids.has(g.id)));
+                }
+            });
+        });
+
+        /* Mantener todo al día entre pestañas y al volver a la app */
+        window.addEventListener('storage', e => {
+            if (e.key !== LS_KEY) return;
+            try { grupos = leerGrupos(); render(); } catch { /* se conserva lo que hay en memoria */ }
+        });
+        document.addEventListener('visibilitychange', () => { if (!document.hidden) render(); });
+
+        /* ---------- Inicio ---------- */
+        pintarSlots();
+        guardar();
+        leerRuta();
     </script>
 </body>
 
